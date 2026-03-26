@@ -1,7 +1,6 @@
 // JX3 Blog Logic - GitHub Pages (Static) Version
 
 // --- 配置區 ---
-// 請在這裡填入您的 Supabase 資訊 (可在 Project Settings -> API 找到)
 const SUPABASE_URL = 'https://fanffwnhkxpfhttylntw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_fsrieSLUXlq-_WDpPY9K_w_eO-dN_jT'; 
 
@@ -11,7 +10,7 @@ const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SU
 const JX3Blog = {
     async init() {
         if (!supabase) {
-            console.error("Supabase SDK 載入失敗");
+            this.showError("Supabase SDK 載入失敗，請檢查網路連線。");
             return;
         }
 
@@ -25,6 +24,18 @@ const JX3Blog = {
         }
     },
 
+    showError(msg) {
+        const root = document.getElementById('root');
+        if (root) {
+            root.innerHTML = `
+                <div class="max-w-2xl mx-auto py-20 text-center">
+                    <h2 class="text-2xl font-bold mb-4 text-red-500">載入出錯</h2>
+                    <p class="text-slate-400 mb-8">${msg}</p>
+                    <a href="https://hub-google.github.io/" class="text-amber-500 underline">返回首頁</a>
+                </div>`;
+        }
+    },
+
     async renderHome() {
         const root = document.getElementById('root');
         if (!root) return;
@@ -32,22 +43,29 @@ const JX3Blog = {
         root.innerHTML = '<div class="flex justify-center py-20"><i class="fa-solid fa-spinner fa-spin text-4xl text-amber-500"></i></div>';
 
         try {
-            const { data: articles, error } = await supabase
-                .from('JX3_Articles')
-                .select('id, title, slug, summary, author, created_at')
-                .eq('is_hidden', 0)
-                .order('created_at', { ascending: false });
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("連線逾時，請檢查 Anon Key 或資料庫權限")), 8000)
+            );
+
+            const { data: articles, error } = await Promise.race([
+                supabase
+                    .from('JX3_Articles')
+                    .select('id, title, slug, summary, author, created_at')
+                    .eq('is_hidden', 0)
+                    .order('created_at', { ascending: false }),
+                timeoutPromise
+            ]);
 
             if (error) throw error;
             
-            if (articles.length === 0) {
-                root.innerHTML = '<p class="text-center text-slate-500 py-20">目前還沒有文章，請透過管理後台發布第一篇！</p>';
+            if (!articles || articles.length === 0) {
+                root.innerHTML = '<p class="text-center text-slate-500 py-20">目前還沒有文章。</p>';
                 return;
             }
 
             root.innerHTML = Templates.home(articles);
         } catch (e) {
-            root.innerHTML = `<p class="text-center text-red-500 py-20">載入失敗：${e.message}<br><small>提示：請檢查 Anon Key 是否正確填寫，並在 Supabase 開啟 RLS 政策。</small></p>`;
+            this.showError(e.message);
         }
     },
 
@@ -58,7 +76,6 @@ const JX3Blog = {
         root.innerHTML = '<div class="flex justify-center py-20"><i class="fa-solid fa-spinner fa-spin text-4xl text-amber-500"></i></div>';
 
         try {
-            // Fetch Post
             const { data: post, error: pError } = await supabase
                 .from('JX3_Articles')
                 .select('*')
@@ -68,7 +85,6 @@ const JX3Blog = {
 
             if (pError) throw pError;
 
-            // Fetch Comments
             const { data: comments, error: cError } = await supabase
                 .from('JX3_Comments')
                 .select('*')
@@ -81,7 +97,7 @@ const JX3Blog = {
             root.innerHTML = Templates.post(post, comments);
             this.setupCommentForm(post.id);
         } catch (e) {
-            root.innerHTML = `<div class="max-w-2xl mx-auto py-20 text-center"><h2 class="text-2xl font-bold mb-4">404 NOT FOUND</h2><p class="text-slate-400 mb-8">${e.message}</p><a href="/" class="text-amber-500 underline">返回首頁</a></div>`;
+            this.showError(e.message);
         }
     },
 

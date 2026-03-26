@@ -43,7 +43,7 @@ const Templates = {
 
         return `
             <div class="max-w-4xl mx-auto px-4 py-12">
-                <a href="/" class="text-slate-500 hover:text-amber-500 text-sm flex items-center gap-2 mb-8 transition">
+                <a href="./" class="text-slate-500 hover:text-amber-500 text-sm flex items-center gap-2 mb-8 transition">
                     <i class="fa-solid fa-arrow-left"></i> 返回列表
                 </a>
 
