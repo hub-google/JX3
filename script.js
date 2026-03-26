@@ -51,7 +51,7 @@ const JX3Blog = {
         window.scrollTo(0, 0);
     },
 
-    renderPost(id) {
+    async renderPost(id) {
         const app = document.getElementById('jx3-app');
         if (!app) return;
 
@@ -62,21 +62,27 @@ const JX3Blog = {
             return;
         }
 
-        const comments = window.JX3_DATA.comments ? window.JX3_DATA.comments.filter(c => c.article_id === post.id) : [];
-
-        app.innerHTML = Templates.post(post, comments);
-        this.setupCommentForm(post.id);
+        // 先渲染模板框架
+        app.innerHTML = Templates.post(post);
         window.scrollTo(0, 0);
-    },
 
-    setupCommentForm(articleId) {
-        const form = document.getElementById('comment-form');
-        if (!form) return;
-
-        form.onsubmit = (e) => {
-            e.preventDefault();
-            alert("「純靜態版」目前不支援即時提交留言。若需更新內容，請直接修改 data.js 並推送到 GitHub。\n\n(這能保證您的網頁 100% 穩定且不轉圈)");
-        };
+        // 非同步讀取文章內容
+        try {
+            const response = await fetch(`posts/${post.slug || post.id}.html`);
+            if (!response.ok) throw new Error("無法讀取內容檔");
+            const content = await response.text();
+            
+            const bodyDiv = document.getElementById('post-body');
+            if (bodyDiv) {
+                bodyDiv.innerHTML = content;
+                // 加入淡入效果
+                bodyDiv.classList.add('fade-in');
+            }
+        } catch (err) {
+            console.error(err);
+            const bodyDiv = document.getElementById('post-body');
+            if (bodyDiv) bodyDiv.innerHTML = `<p class="text-red-400 py-20 text-center">內容加載失敗：${err.message}</p>`;
+        }
     }
 };
 
