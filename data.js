@@ -5,7 +5,7 @@ const JX3_DATA = {
         {
             id: "report-2026-cny",
             slug: "jx3-2026-cny-diagnostic",
-            title: "剑网3 2026春节运营策略深度诊断报告",
+            title: "JX3 2026春节运营策略深度诊断报告",
             summary: "关于2026春节强制关闭“绝境战场·普通模式”的诊断书。官方仍用2020年的眼光看待2026年的玩家生态。",
             author: "JX3 觀察員",
             created_at: "2026-02-02 12:00:00",
@@ -98,7 +98,7 @@ const JX3_DATA = {
                             PC体验的毁灭性降级
                         </h4>
                         <p class="text-sm text-slate-300 leading-relaxed">
-                            剑网3吃鸡的PVP底层逻辑建立在键鼠的精密交互之上，其核心在于技能博弈、免控链与技能CD的掌握與極致的<strong>位移拉扯與距離把控</strong>——例如利用地形高低差（跳山）規避傷害、利用位移技能與移速差精準「卡距離」，實現「讓對手打不到」這一最高級的減傷手段（此為其他模式少有的深度博弈）。然而，手機端「搓玻璃」的物理局限天然無法承載這種高頻微操。官方這種「向下兼容」的策略，強迫習慣了硬核競技的玩家去玩閹割技能、毫無操作深度的「娛樂小遊戲」，這不僅是策略錯誤，更是對核心玩法的背刺。
+                            JX3吃鸡的PVP底层逻辑建立在键鼠的精密交互之上，其核心在于技能博弈、免控链与技能CD的掌握與極致的<strong>位移拉扯與距離把控</strong>——例如利用地形高低差（跳山）規避傷害、利用位移技能與移速差精準「卡距離」，實現「讓對手打不到」這一最高級的減傷手段（此為其他模式少有的深度博弈）。然而，手機端「搓玻璃」的物理局限天然無法承載這種高頻微操。官方這種「向下兼容」的策略，強迫習慣了硬核競技的玩家去玩閹割技能、毫無操作深度的「娛樂小遊戲」，這不僅是策略錯誤，更是對核心玩法的背刺。
                         </p>
                     </div>
 
@@ -124,7 +124,7 @@ const JX3_DATA = {
                     <h3 class="text-xl font-bold text-white">误判三：低估成年人的“绝情”</h3>
                 </div>
                 <p class="text-gray-300 border-l-4 border-purple-500 pl-3 mb-6 font-bold">
-                    剑网3玩家平均年龄30+。对于成年人来说，<span class="text-amber-400">时间资源的稀缺性决定了流失的不可逆性</span>。
+                    JX3玩家平均年龄30+。对于成年人来说，<span class="text-amber-400">时间资源的稀缺性决定了流失的不可逆性</span>。
                 </p>
 
                 <!-- Structured Content Points -->
@@ -136,7 +136,7 @@ const JX3_DATA = {
                             <i class="fa-solid fa-clock text-blue-400 mr-2"></i> 时间填补效应
                         </h4>
                         <p class="text-xs text-slate-400 leading-relaxed">
-                            成年人的娱乐时间少且高度饱和。一旦剑网3主动让出春节这一个月的生态位，玩家的空窗期会迅速被<strong>Steam新作、王者荣耀或家庭生活</strong>填满。
+                            成年人的娱乐时间少且高度饱和。一旦JX3主动让出春节这一个月的生态位，玩家的空窗期会迅速被<strong>Steam新作、王者荣耀或家庭生活</strong>填满。
                             <br><span class="text-xs text-amber-500 mt-1 block">后果：新的娱乐习惯一旦形成，再想抢回玩家的时间，成本将是现在的数倍。</span>
                         </p>
                     </div>
@@ -158,7 +158,7 @@ const JX3_DATA = {
                             <i class="fa-solid fa-bullhorn text-purple-400 mr-2"></i> 头部主播的流失与商业傲慢
                         </h4>
                         <p class="text-xs text-slate-400 leading-relaxed">
-                            剑网3头部主播（如<strong>童话、落叶听松、晏殊、文浩、花开</strong>）的直播內容中，<strong>吃雞主題佔比高達70%以上</strong>。這證明了該模式具備極高的流量價值——玩家愛玩，更愛看。
+                            JX3头部主播（如<strong>童话、落叶听松、晏殊、文浩、花开</strong>）的直播內容中，<strong>吃雞主題佔比高達70%以上</strong>。這證明了該模式具備極高的流量價值——玩家愛玩，更愛看。
                             <br><span class="block mt-1">
                             <strong>「不做裝備導致官方賺不到錢」是官方商業模式的局限，而非玩家的錯。</strong> 官方不能因為無法直接從該模式通過數值變現，就戰略性忽視其巨大的生態留存價值。當這些賴以為生的意見領袖都感到絕望時，核心圈層的信任鏈條已宣告斷裂。
                             </span>
