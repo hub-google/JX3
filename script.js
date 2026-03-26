@@ -35,7 +35,7 @@ const JX3Blog = {
         const root = document.getElementById('root');
         if (!root) return;
 
-        const articles = window.JX3_DATA.articles.filter(a => a.is_hidden === 0);
+        const articles = window.JX3_DATA.articles.filter(a => a.is_hidden !== 1);
         
         if (!articles || articles.length === 0) {
             root.innerHTML = '<p class="text-center text-slate-400 py-32">目前還沒有文章。</p>';

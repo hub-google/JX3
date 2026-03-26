@@ -9,6 +9,7 @@ const JX3_DATA = {
             summary: "关于2026春节强制关闭“绝境战场·普通模式”的诊断书。官方仍用2020年的眼光看待2026年的玩家生态。",
             author: "JX3 觀察員",
             created_at: "2026-02-02 12:00:00",
+            is_hidden: 0,
             content: `
     <!-- Hero Section -->
     <section class="max-w-6xl mx-auto px-4 py-12 text-center text-left">
