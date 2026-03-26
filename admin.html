@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JX3 Blog | 管理後台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-12">
+            <h1 class="text-3xl font-black text-white hover:text-amber-500 transition cursor-pointer" onclick="location.href='/'">
+                <i class="fa-solid fa-gears mr-3 text-amber-500"></i>JX3 Blog Admin
+            </h1>
+            <a href="/" class="text-sm text-slate-400 hover:text-white"><i class="fa-solid fa-house mr-2"></i>返回首頁</a>
+        </div>
+
+        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+            <h2 class="text-xl font-bold text-white mb-6">發布新文章</h2>
+            
+            <form id="admin-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章標題</label>
+                        <input type="text" id="title" required placeholder="例如：2026春節運營策略..." 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">網址路徑 (Slug)</label>
+                        <input type="text" id="slug" placeholder="例如：cny-strategy-2026" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章簡介 (Summary)</label>
+                    <textarea id="summary" rows="2" placeholder="顯示在列表中的簡短預覽..." 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">正文內容 (支援 HTML)</label>
+                    <textarea id="content" required rows="15" placeholder="請輸入文章 HTML 內容..." 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm focus:border-amber-500 outline-none transition"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="reset" class="px-6 py-3 text-slate-400 hover:text-white transition">清空</button>
+                    <button type="submit" id="submit-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-10 py-3 rounded-lg transition shadow-lg flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> 立即發布
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('admin-form');
+        const btn = document.getElementById('submit-btn');
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const payload = {
+                title: document.getElementById('title').value,
+                slug: document.getElementById('slug').value,
+                summary: document.getElementById('summary').value,
+                content: document.getElementById('content').value
+            };
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>處理中...';
+
+            try {
+                // Request will trigger browser's Basic Auth prompt due to 401 response from server
+                const res = await fetch('/api/admin/articles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert('✅ 文章已成功發布！');
+                    form.reset();
+                } else if (res.status === 401) {
+                    alert('❌ 未經授權，請重新整理頁面並輸入管理員帳密。');
+                } else {
+                    const err = await res.json();
+                    alert('❌ 錯誤：' + err.error);
+                }
+            } catch (e) {
+                alert('系統錯誤：' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> 立即發布';
+            }
+        };
+    </script>
+</body>
+</html>
