@@ -1,8 +1,9 @@
-// JX3 Blog Logic - Pure Git Static Version (No Supabase)
+// JX3 Blog Logic - Pure Git Static Version - v1.0.2
+console.log("JX3 Blog Engine v1.0.2 Loaded");
 
 const JX3Blog = {
     init() {
-        // 從全局對象 data.js 讀取資料
+        console.log("Initializing JX3 Blog...");
         const data = window.JX3_DATA;
         if (!data) {
             this.showError("資料載入失敗 (data.js 缺失)。");
@@ -20,47 +21,50 @@ const JX3Blog = {
     },
 
     showError(msg) {
-        const root = document.getElementById('root');
-        if (root) {
-            root.innerHTML = `
+        const app = document.getElementById('jx3-app');
+        if (app) {
+            app.innerHTML = `
                 <div class="max-w-2xl mx-auto py-32 text-center px-6">
                     <h2 class="text-2xl font-black mb-4 text-white">發生錯誤 ERROR</h2>
                     <p class="text-slate-400 mb-8 leading-relaxed">${msg}</p>
-                    <a href="./" class="inline-block bg-amber-600 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-500 transition">返回目錄 INDEX</a>
+                    <a href="./" class="inline-block bg-amber-600 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-500 transition">返回首頁 INDEX</a>
                 </div>`;
         }
     },
 
     renderHome() {
-        const root = document.getElementById('root');
-        if (!root) return;
-
-        const articles = window.JX3_DATA.articles.filter(a => a.is_hidden !== 1);
-        
-        if (!articles || articles.length === 0) {
-            root.innerHTML = '<p class="text-center text-slate-400 py-32">目前還沒有文章。</p>';
+        const app = document.getElementById('jx3-app');
+        if (!app) {
+            console.error("Critical Error: Container 'jx3-app' not found!");
             return;
         }
 
-        root.innerHTML = Templates.home(articles);
+        const articles = window.JX3_DATA.articles.filter(a => a.is_hidden != 1);
+        console.log("Visible articles found:", articles.length);
+        
+        if (!articles || articles.length === 0) {
+            app.innerHTML = '<p class="text-center text-slate-400 py-32">目前還沒有文章 (No articles found)。</p>';
+            return;
+        }
+
+        app.innerHTML = Templates.home(articles);
         window.scrollTo(0, 0);
     },
 
     renderPost(id) {
-        const root = document.getElementById('root');
-        if (!root) return;
+        const app = document.getElementById('jx3-app');
+        if (!app) return;
 
         const post = window.JX3_DATA.articles.find(a => a.id === id || a.slug === id);
 
-        if (!post || post.is_hidden === 1) {
+        if (!post || post.is_hidden == 1) {
             this.showError("找不到這篇文章，或該內容已移除。");
             return;
         }
 
-        // 靜態版留言從 data.js 讀取
-        const comments = window.JX3_DATA.comments.filter(c => c.article_id === post.id);
+        const comments = window.JX3_DATA.comments ? window.JX3_DATA.comments.filter(c => c.article_id === post.id) : [];
 
-        root.innerHTML = Templates.post(post, comments);
+        app.innerHTML = Templates.post(post, comments);
         this.setupCommentForm(post.id);
         window.scrollTo(0, 0);
     },
