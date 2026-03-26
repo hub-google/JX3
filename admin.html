@@ -13,7 +13,7 @@
 <body class="min-h-screen p-8">
     <div class="max-w-4xl mx-auto">
         <header class="mb-12 border-b border-slate-800 pb-8">
-            <h1 class="text-4xl font-black text-white uppercase tracking-tighter">JX3 內容管理系統</h1>
+            <h1 class="text-4xl font-black text-white uppercase tracking-tighter">JX3 内容管理系统</h1>
             <p class="text-slate-500 mt-2 font-bold tracking-widest text-xs">JX3 OBSERVATION ROOM · PUBLISHING WORKFLOW</p>
         </header>
 
@@ -22,33 +22,33 @@
             <div class="space-y-8">
                 <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
                     <h2 class="text-xl font-bold mb-6 text-amber-500 flex items-center gap-2">
-                        <i class="fa-solid fa-plus-circle"></i> 發布新文章
+                        <i class="fa-solid fa-plus-circle"></i> 发布新文章
                     </h2>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章標題</label>
-                            <input id="title" type="text" placeholder="例：2026 春節發展報告" class="w-full bg-slate-800 border-none rounded p-3 text-white">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章标题</label>
+                            <input id="title" type="text" placeholder="例：2026 春节发展报告" class="w-full bg-slate-800 border-none rounded p-3 text-white">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">檔案名稱 (Slug)</label>
-                            <input id="slug" type="text" placeholder="例：2 (對應 posts/2.html)" class="w-full bg-slate-800 border-none rounded p-3 text-white">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">档案名称 (Slug)</label>
+                            <input id="slug" type="text" placeholder="例：2 (对应 posts/2.html)" class="w-full bg-slate-800 border-none rounded p-3 text-white">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">簡短摘要 (首頁顯示用)</label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">简短摘要 (首页显示用)</label>
                             <textarea id="summary" rows="3" class="w-full bg-slate-800 border-none rounded p-3 text-white"></textarea>
                         </div>
                         <button onclick="generate()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-4 rounded transition uppercase tracking-widest">
-                            生成發布代碼
+                            生成发布代码
                         </button>
                     </div>
                 </div>
 
                 <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
-                    <h2 class="text-xl font-bold mb-4 text-white">管理說明</h2>
+                    <h2 class="text-xl font-bold mb-4 text-white">管理说明</h2>
                     <ul class="text-sm text-slate-400 space-y-3">
-                        <li><span class="text-amber-500 font-bold">1. 編輯舊文章</span>：直接開啟資料夾中的 <code>posts/檔案名稱.html</code> 修改內容後存檔、Git Push 即可。</li>
-                        <li><span class="text-amber-500 font-bold">2. 發布新文章</span>：依照右側產生的步驟進行。</li>
-                        <li><span class="text-amber-500 font-bold">3. 刪除文章</span>：從 <code>data.js</code> 移除對應區塊，並刪除 <code>posts/</code> 裡的檔案。</li>
+                        <li><span class="text-amber-500 font-bold">1. 编辑旧文章</span>：直接打开文件夹中的 <code>posts/文件名称.html</code> 修改内容后保存、Git Push 即可。</li>
+                        <li><span class="text-amber-500 font-bold">2. 发布新文章</span>：按照右侧生成的步骤进行。</li>
+                        <li><span class="text-amber-500 font-bold">3. 删除文章</span>：从 <code>data.js</code> 移除对应区块，并删除 <code>posts/</code> 里的文件。</li>
                     </ul>
                 </div>
             </div>
@@ -56,15 +56,15 @@
             <!-- Right: Output -->
             <div id="output" class="space-y-6 opacity-50 pointer-events-none transition-opacity">
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                    <h3 class="text-sm font-bold text-white mb-2 uppercase tracking-widest">步驟 1：更新資料清單</h3>
-                    <p class="text-xs text-slate-500 mb-4">請將下方代碼貼入 <code>data.js</code> 的 articles 陣列首位。</p>
+                    <h3 class="text-sm font-bold text-white mb-2 uppercase tracking-widest">步骤 1：更新资料清单</h3>
+                    <p class="text-xs text-slate-500 mb-4">请将下方代码贴入 <code>data.js</code> 的 articles 阵列首位。</p>
                     <pre id="data-block" class="bg-black/50 p-4 rounded text-[10px] text-amber-500 overflow-x-auto"></pre>
                 </div>
 
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center py-10">
                     <i class="fa-solid fa-upload text-3xl text-slate-600 mb-4"></i>
-                    <h3 class="text-sm font-bold text-white mb-2 uppercase tracking-widest">步驟 2：提交並發布</h3>
-                    <p class="text-xs text-slate-500">在 Git 終端機輸入：<br><code>git add . && git commit -m "Post new article" && git push</code></p>
+                    <h3 class="text-sm font-bold text-white mb-2 uppercase tracking-widest">步骤 2：提交并发布</h3>
+                    <p class="text-xs text-slate-500">在 Git 终端机输入：<br><code>git add . && git commit -m "Post new article" && git push</code></p>
                 </div>
             </div>
         </section>
@@ -82,7 +82,7 @@
     slug: "${slug}",
     title: "${title}",
     summary: "${summary}",
-    author: "JX3 觀察員",
+    author: "JX3 观察员",
     created_at: "${date}"
 },`;
 

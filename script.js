@@ -6,7 +6,7 @@ const JX3Blog = {
         console.log("Initializing JX3 Blog...");
         const data = window.JX3_DATA;
         if (!data) {
-            this.showError("資料載入失敗 (data.js 缺失)。");
+            this.showError("资料载入失败 (data.js 缺失)。");
             return;
         }
 
@@ -25,9 +25,9 @@ const JX3Blog = {
         if (app) {
             app.innerHTML = `
                 <div class="max-w-2xl mx-auto py-32 text-center px-6">
-                    <h2 class="text-2xl font-black mb-4 text-white">發生錯誤 ERROR</h2>
+                    <h2 class="text-2xl font-black mb-4 text-white">发生错误 ERROR</h2>
                     <p class="text-slate-400 mb-8 leading-relaxed">${msg}</p>
-                    <a href="./" class="inline-block bg-amber-600 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-500 transition">返回首頁 INDEX</a>
+                    <a href="./" class="inline-block bg-amber-600 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-500 transition">返回首页 INDEX</a>
                 </div>`;
         }
     },
@@ -43,7 +43,7 @@ const JX3Blog = {
         console.log("Visible articles found:", articles.length);
         
         if (!articles || articles.length === 0) {
-            app.innerHTML = '<p class="text-center text-slate-400 py-32">目前還沒有文章 (No articles found)。</p>';
+            app.innerHTML = '<p class="text-center text-slate-400 py-32">目前还没有文章 (No articles found)。</p>';
             return;
         }
 
@@ -58,7 +58,7 @@ const JX3Blog = {
         const post = window.JX3_DATA.articles.find(a => a.id === id || a.slug === id);
 
         if (!post || post.is_hidden == 1) {
-            this.showError("找不到這篇文章，或該內容已移除。");
+            this.showError("找不到这篇文章，或该内容已移除。");
             return;
         }
 
@@ -81,7 +81,7 @@ const JX3Blog = {
         } catch (err) {
             console.error(err);
             const bodyDiv = document.getElementById('post-body');
-            if (bodyDiv) bodyDiv.innerHTML = `<p class="text-red-400 py-20 text-center">內容加載失敗：${err.message}</p>`;
+            if (bodyDiv) bodyDiv.innerHTML = `<p class="text-red-400 py-20 text-center">内容加载失败：${err.message}</p>`;
         }
     }
 };
