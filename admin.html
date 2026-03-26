@@ -96,7 +96,7 @@
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>發布中...';
 
             try {
-                const { error } = await supabase.from('JX3_Articles').insert([payload]);
+                const { error } = await supabase.from('jx3_articles').insert([payload]);
                 if (error) throw error;
                 
                 alert('✅ 文章已成功發布到 Supabase！');

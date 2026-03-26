@@ -3,65 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>劍網3 運營隨筆 | 深度觀察與行業洞察</title>
+    <title>劍網3 觀察報告 | 深度數據與行業研究</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="深度觀察 2026 劍網3 玩家生態、運營策略與行業洞察。專注於 JX3 吃雞、PVP 與社群分析。">
-    <meta name="keywords" content="劍網3, JX3, 運營策略, 專案診斷, 2026春節, 絕境戰場, 吃雞">
+    <meta name="description" content="深度觀察 2026 劍網3 玩家生態、運營策略與行業洞察。">
     <meta name="author" content="JX3 Admin">
     
     <!-- Styles & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background-color: #0f172a;
-            color: #e2e8f0;
+            background-color: #f8fafc; /* 超輕淺藍灰色牆面 */
+            color: #334155;
+            line-height: 1.8;
         }
-        .prose h2 { color: #ffffff !important; font-weight: 800; border-left: 4px solid #fbbf24; padding-left: 1rem; margin-top: 2.5rem; }
-        .prose h3 { color: #facc15 !important; font-weight: 700; margin-top: 2rem; }
-        .prose strong { color: #fde68a !important; }
+        .prose-serif {
+            font-family: 'Noto Serif SC', serif;
+        }
+        .prose h2 { color: #1e293b !important; font-weight: 800; border-left: 4px solid #f59e0b; padding-left: 1rem; margin-top: 3rem; margin-bottom: 1.5rem; font-size: 1.5rem; }
+        .prose h3 { color: #475569 !important; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; font-size: 1.25rem; }
         .prose p { margin-bottom: 1.5rem; text-align: justify; }
-        .prose blockquote { border-left-color: #fbbf24; background: rgba(30, 41, 59, 0.5); padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; font-style: italic; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .prose strong { color: #0f172a !important; font-weight: 700; }
+        .prose blockquote { border-left: 4px solid #cbd5e1; background: #f1f5f9; padding: 1.5rem; font-style: italic; color: #64748b; margin: 2rem 0; }
+        
+        /* Blogger Style Post Cards */
+        .post-card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-amber-500/30">
+<body class="min-h-screen flex flex-col selection:bg-amber-200">
 
-    <!-- Header Navigation -->
-    <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="location.href='https://hub-google.github.io/'">
-                <div class="bg-amber-500 p-2 rounded-lg">
-                    <i class="fa-solid fa-feather-pointed text-slate-900 text-lg"></i>
-                </div>
-                <span class="font-bold text-xl tracking-tight text-white">JX3 BLOG</span>
+    <!-- Header Navigation (Minimalist Blogger Style) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex flex-col cursor-pointer" onclick="location.href='https://hub-google.github.io/JX3/'">
+                <span class="font-black text-2xl tracking-tighter text-slate-900">劍網3 觀察報告</span>
+                <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold leading-none">JX3 OBSERVATION REPORT</span>
             </div>
             
-            <div class="flex items-center gap-8 text-sm font-medium text-slate-400">
-                <a href="https://hub-google.github.io/" class="hover:text-white transition">回首頁</a>
-            </div>
+            <nav class="flex items-center gap-6 text-sm font-bold text-slate-500">
+                <a href="https://hub-google.github.io/JX3/" class="hover:text-amber-600 transition">首頁目錄</a>
+            </nav>
         </div>
-    </nav>
+    </header>
 
     <!-- Main Content Area -->
-    <main id="root" class="flex-grow">
-        <!-- Content will be injected by script.js -->
-        <div class="flex justify-center py-20">
-            <i class="fa-solid fa-spinner fa-spin text-4xl text-amber-500"></i>
+    <main id="root" class="flex-grow bg-slate-50">
+        <!-- Spinner -->
+        <div class="flex justify-center py-32">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-slate-300"></i>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-900 py-12">
-        <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-slate-600 text-xs mt-4">&copy; 2026 JX3 運營觀察室. All rights reserved.</p>
+    <footer class="bg-white border-t border-slate-200 py-16">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <p class="text-slate-400 text-xs tracking-widest font-bold uppercase">&copy; 2026 JX3 運營觀察室</p>
+            <p class="text-[10px] text-slate-300 mt-2 italic">此網誌內容僅供行業交流與研究參考</p>
         </div>
     </footer>
 

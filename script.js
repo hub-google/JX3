@@ -10,7 +10,7 @@ const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SU
 const JX3Blog = {
     async init() {
         if (!supabase) {
-            this.showError("Supabase SDK 載入失敗，請檢查網路連線。");
+            this.showError("Supabase SDK 載入失敗。");
             return;
         }
 
@@ -28,10 +28,10 @@ const JX3Blog = {
         const root = document.getElementById('root');
         if (root) {
             root.innerHTML = `
-                <div class="max-w-2xl mx-auto py-20 text-center">
-                    <h2 class="text-2xl font-bold mb-4 text-red-500">載入出錯</h2>
-                    <p class="text-slate-400 mb-8">${msg}</p>
-                    <a href="https://hub-google.github.io/" class="text-amber-500 underline">返回首頁</a>
+                <div class="max-w-2xl mx-auto py-32 text-center px-6">
+                    <h2 class="text-2xl font-black mb-4 text-slate-900">載入出錯</h2>
+                    <p class="text-slate-500 mb-8 leading-relaxed">${msg}</p>
+                    <a href="https://hub-google.github.io/JX3/" class="inline-block bg-slate-900 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-600 transition">返回目錄</a>
                 </div>`;
         }
     },
@@ -40,16 +40,17 @@ const JX3Blog = {
         const root = document.getElementById('root');
         if (!root) return;
         
-        root.innerHTML = '<div class="flex justify-center py-20"><i class="fa-solid fa-spinner fa-spin text-4xl text-amber-500"></i></div>';
+        root.innerHTML = '<div class="flex justify-center py-32"><i class="fa-solid fa-spinner fa-spin text-4xl text-slate-300"></i></div>';
 
         try {
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("連線逾時，請檢查 Anon Key 或資料庫權限")), 8000)
+                setTimeout(() => reject(new Error("資料庫連線逾時。請確認 Supabase 的 RLS 政策已開啟此資料表的「公開讀取 (SELECT)」權限。")), 8000)
             );
 
+            // 重要：修正資料表名稱為全小寫，以對應 Supabase 預設命名
             const { data: articles, error } = await Promise.race([
                 supabase
-                    .from('JX3_Articles')
+                    .from('jx3_articles') 
                     .select('id, title, slug, summary, author, created_at')
                     .eq('is_hidden', 0)
                     .order('created_at', { ascending: false }),
@@ -59,7 +60,7 @@ const JX3Blog = {
             if (error) throw error;
             
             if (!articles || articles.length === 0) {
-                root.innerHTML = '<p class="text-center text-slate-500 py-20">目前還沒有文章。</p>';
+                root.innerHTML = '<p class="text-center text-slate-400 py-32">目前還沒有文章。</p>';
                 return;
             }
 
@@ -73,11 +74,11 @@ const JX3Blog = {
         const root = document.getElementById('root');
         if (!root) return;
 
-        root.innerHTML = '<div class="flex justify-center py-20"><i class="fa-solid fa-spinner fa-spin text-4xl text-amber-500"></i></div>';
+        root.innerHTML = '<div class="flex justify-center py-32"><i class="fa-solid fa-spinner fa-spin text-4xl text-slate-300"></i></div>';
 
         try {
             const { data: post, error: pError } = await supabase
-                .from('JX3_Articles')
+                .from('jx3_articles')
                 .select('*')
                 .or(`id.eq.${id},slug.eq.${id}`)
                 .eq('is_hidden', 0)
@@ -86,7 +87,7 @@ const JX3Blog = {
             if (pError) throw pError;
 
             const { data: comments, error: cError } = await supabase
-                .from('JX3_Comments')
+                .from('jx3_comments')
                 .select('*')
                 .eq('article_id', post.id)
                 .eq('isHidden', 0)
@@ -119,17 +120,17 @@ const JX3Blog = {
             };
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>發布中...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>傳送中...';
 
             try {
-                const { error } = await supabase.from('JX3_Comments').insert([payload]);
+                const { error } = await supabase.from('jx3_comments').insert([payload]);
                 if (error) throw error;
                 this.renderPost(articleId); 
             } catch (e) {
-                alert('發布失敗：' + e.message);
+                alert('回覆失敗：' + e.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = '提交留言';
+                btn.innerText = '提交回覆';
             }
         };
     },
