@@ -9,11 +9,11 @@ const Templates = {
                     <span class="text-[10px] text-slate-300 font-bold uppercase tracking-widest">BY ${art.author}</span>
                 </div>
                 <h2 class="text-3xl font-black text-white hover:text-amber-500 transition leading-tight line-clamp-2">
-                    <a href="?id=${art.id || art.slug}">${art.title}</a>
+                    <a href="posts/${art.slug}.html">${art.title}</a>
                 </h2>
                 <p class="text-slate-400 text-sm leading-loose line-clamp-3">${art.summary || '點擊閱讀完整內容...'}</p>
                 <div class="mt-4">
-                    <a href="?id=${art.id || art.slug}" class="text-xs font-black text-white uppercase border-b-2 border-amber-500/30 pb-1 hover:border-amber-500 transition">繼續閱讀 READ MORE</a>
+                    <a href="posts/${art.slug}.html" class="text-xs font-black text-white uppercase border-b-2 border-amber-500/30 pb-1 hover:border-amber-500 transition">繼續閱讀 READ MORE</a>
                 </div>
             </article>
         `).join('');
