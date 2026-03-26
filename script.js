@@ -24,9 +24,9 @@ const JX3Blog = {
         if (root) {
             root.innerHTML = `
                 <div class="max-w-2xl mx-auto py-32 text-center px-6">
-                    <h2 class="text-2xl font-black mb-4 text-slate-900">發生錯誤</h2>
-                    <p class="text-slate-500 mb-8 leading-relaxed">${msg}</p>
-                    <a href="./" class="inline-block bg-slate-900 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-600 transition">返回目錄</a>
+                    <h2 class="text-2xl font-black mb-4 text-white">發生錯誤 ERROR</h2>
+                    <p class="text-slate-400 mb-8 leading-relaxed">${msg}</p>
+                    <a href="./" class="inline-block bg-amber-600 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-500 transition">返回目錄 INDEX</a>
                 </div>`;
         }
     },
