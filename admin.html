@@ -1,88 +1,93 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JX3 Blog | 管理工具 (靜態代碼生成)</title>
+    <title>JX3 觀察室 | 管理後台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f1f5f9; font-family: sans-serif; }
+        body { font-family: 'Noto Sans SC', sans-serif; background: #020617; color: #e2e8f0; }
     </style>
 </head>
-<body class="p-8">
+<body class="min-h-screen p-8">
     <div class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-slate-900">管理工具 (文章代碼生成器)</h1>
-            <a href="./" class="text-slate-500 hover:text-slate-900"><i class="fa-solid fa-arrow-left mr-2"></i>返回首頁</a>
+        <header class="mb-12 border-b border-slate-800 pb-8">
+            <h1 class="text-4xl font-black text-white uppercase tracking-tighter">JX3 內容管理系統</h1>
+            <p class="text-slate-500 mt-2 font-bold tracking-widest text-xs">JX3 OBSERVATION ROOM · PUBLISHING WORKFLOW</p>
         </header>
 
-        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-slate-700 mb-2">文章標題</label>
-                <input type="text" id="title" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500">
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Left: Generator Form -->
+            <div class="space-y-8">
+                <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
+                    <h2 class="text-xl font-bold mb-6 text-amber-500 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle"></i> 發布新文章
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章標題</label>
+                            <input id="title" type="text" placeholder="例：2026 春節發展報告" class="w-full bg-slate-800 border-none rounded p-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">檔案名稱 (Slug)</label>
+                            <input id="slug" type="text" placeholder="例：2 (對應 posts/2.html)" class="w-full bg-slate-800 border-none rounded p-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">簡短摘要 (首頁顯示用)</label>
+                            <textarea id="summary" rows="3" class="w-full bg-slate-800 border-none rounded p-3 text-white"></textarea>
+                        </div>
+                        <button onclick="generate()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-4 rounded transition uppercase tracking-widest">
+                            生成發布代碼
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
+                    <h2 class="text-xl font-bold mb-4 text-white">管理說明</h2>
+                    <ul class="text-sm text-slate-400 space-y-3">
+                        <li><span class="text-amber-500 font-bold">1. 編輯舊文章</span>：直接開啟資料夾中的 <code>posts/檔案名稱.html</code> 修改內容後存檔、Git Push 即可。</li>
+                        <li><span class="text-amber-500 font-bold">2. 發布新文章</span>：依照右側產生的步驟進行。</li>
+                        <li><span class="text-amber-500 font-bold">3. 刪除文章</span>：從 <code>data.js</code> 移除對應區塊，並刪除 <code>posts/</code> 裡的檔案。</li>
+                    </ul>
+                </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-slate-700 mb-2">短網址名 (Slug, 僅限英文與數字)</label>
-                <input type="text" id="slug" placeholder="e.g. pvp-report-01" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500">
+            <!-- Right: Output -->
+            <div id="output" class="space-y-6 opacity-50 pointer-events-none transition-opacity">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                    <h3 class="text-sm font-bold text-white mb-2 uppercase tracking-widest">步驟 1：更新資料清單</h3>
+                    <p class="text-xs text-slate-500 mb-4">請將下方代碼貼入 <code>data.js</code> 的 articles 陣列首位。</p>
+                    <pre id="data-block" class="bg-black/50 p-4 rounded text-[10px] text-amber-500 overflow-x-auto"></pre>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center py-10">
+                    <i class="fa-solid fa-upload text-3xl text-slate-600 mb-4"></i>
+                    <h3 class="text-sm font-bold text-white mb-2 uppercase tracking-widest">步驟 2：提交並發布</h3>
+                    <p class="text-xs text-slate-500">在 Git 終端機輸入：<br><code>git add . && git commit -m "Post new article" && git push</code></p>
+                </div>
             </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-slate-700 mb-2">摘要 (一兩句話)</label>
-                <textarea id="summary" rows="2" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500"></textarea>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-slate-700 mb-2">文章內文 (支援 HTML)</label>
-                <textarea id="content" rows="10" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500 font-mono text-sm" placeholder="<p>您的文章內容...</p>"></textarea>
-            </div>
-
-            <button onclick="generateCode()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-lg hover:bg-amber-600 transition">
-                生成 data.js 片段
-            </button>
-        </div>
-
-        <div id="result-area" class="mt-8 hidden">
-            <h2 class="text-xl font-bold mb-4 text-slate-900">生成的代碼 (請複製並貼上到 data.js)：</h2>
-            <pre id="output" class="bg-slate-900 text-amber-200 p-6 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap select-all"></pre>
-            <p class="text-sm text-slate-500 mt-4 italic">* 複製上面的代碼，貼進 `data.js` 的 `articles` 陣列中即可完成發布。</p>
-        </div>
+        </section>
     </div>
 
     <script>
-        function generateCode() {
+        function generate() {
             const title = document.getElementById('title').value;
-            const slug = document.getElementById('slug').value || Date.now();
+            const slug = document.getElementById('slug').value || title.toLowerCase().replace(/ /g, '-');
             const summary = document.getElementById('summary').value;
-            const content = document.getElementById('content').value;
-            const author = "JX3 觀察員";
-            const date = new Date().toISOString().replace('T', ' ').split('.')[0];
+            const date = new Date().toISOString().split('T')[0] + " 12:00:00";
 
-            // 1. 生成 Metadata (用於 data.js)
-            const metadataObj = {
-                id: String(Date.now()),
-                slug: slug,
-                title: title,
-                summary: summary,
-                author: author,
-                created_at: date,
-                is_hidden: 0
-            };
+            const dataBlock = `{
+    id: ${Date.now()},
+    slug: "${slug}",
+    title: "${title}",
+    summary: "${summary}",
+    author: "JX3 觀察員",
+    created_at: "${date}"
+},`;
 
-            const metadataStr = JSON.stringify(metadataObj, null, 4);
-            
-            document.getElementById('output').innerText = 
-                "// [步驟 1] 將此片段貼入 data.js 的 articles 陣列中：\n" + 
-                metadataStr + ",\n\n" +
-                "// [步驟 2] 將內容儲存為新檔案：\n" +
-                "// 檔案路徑: posts/" + slug + ".html\n" +
-                "// 檔案內容如下：\n" +
-                "------------------------------------------\n" +
-                content;
-
-            document.getElementById('result-area').classList.remove('hidden');
-            window.scrollTo(0, document.body.scrollHeight);
+            document.getElementById('data-block').innerText = dataBlock;
+            document.getElementById('output').classList.remove('opacity-50', 'pointer-events-none');
         }
     </script>
 </body>

@@ -19,12 +19,11 @@ const Templates = {
         `).join('');
 
         return `
-            <div class="max-w-3xl mx-auto py-16 px-6">
-                <div class="mb-16 border-b-4 border-amber-500 pb-4 inline-block">
-                    <h3 class="text-xl font-black uppercase tracking-tighter text-white">JX3 深度報告 LATEST REPORTS</h3>
+            <section class="max-w-6xl mx-auto px-4 py-20">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    ${cards}
                 </div>
-                ${cards}
-            </div>
+            </section>
         `;
     },
 
