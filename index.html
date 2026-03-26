@@ -88,9 +88,18 @@
         </div>
     </footer>
 
-    <!-- Core Dependencies (Pure Git Version with Cache Buster) -->
-    <script src="data.js?v=20260326_02"></script>
-    <script src="templates.js?v=20260326_02"></script>
-    <script src="script.js?v=20260326_02"></script>
+    <!-- Core Dependencies with Automatic Cache Buster -->
+    <script>
+        (function() {
+            const version = Date.now();
+            const scripts = ['data.js', 'templates.js', 'script.js'];
+            scripts.forEach(src => {
+                const s = document.createElement('script');
+                s.src = `${src}?v=${version}`;
+                s.async = false; // 確保按順序執行
+                document.body.appendChild(s);
+            });
+        })();
+    </script>
 </body>
 </html>
