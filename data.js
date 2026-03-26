@@ -2,9 +2,9 @@
 const JX3_DATA = {
     articles: [
         {
-            id: "report-2026-cny",
-            slug: "jx3-2026-cny-diagnostic",
-            title: "JX3 2026春节运营策略深度诊断报告",
+            id: 1,
+            slug: "1",
+            title: "關於2026春節強制關閉「絕境戰場·普通模式」的診斷書",
             summary: "关于2026春节强制关闭“绝境战场·普通模式”的诊断书。官方仍用2020年的眼光看待2026年的玩家生态。",
             author: "JX3 觀察員",
             created_at: "2026-02-02 12:00:00",
