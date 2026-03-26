@@ -21,7 +21,7 @@ const Templates = {
         return `
             <div class="max-w-3xl mx-auto py-16 px-6">
                 <div class="mb-16 border-b-4 border-amber-500 pb-4 inline-block">
-                    <h3 class="text-xl font-black uppercase tracking-tighter text-white">最新報告 LATEST REPORTS</h3>
+                    <h3 class="text-xl font-black uppercase tracking-tighter text-white">JX3 深度報告 LATEST REPORTS</h3>
                 </div>
                 ${cards}
             </div>
@@ -78,7 +78,7 @@ const Templates = {
 
                 <div class="mt-20 text-center">
                     <a href="https://hub-google.github.io/JX3/" class="text-slate-500 hover:text-amber-500 uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2 transition">
-                        <i class="fa-solid fa-chevron-left"></i> 返回報告目錄 BACK TO INDEX
+                        <i class="fa-solid fa-chevron-left"></i> 返回首頁 BACK TO HOME
                     </a>
                 </div>
             </div>
