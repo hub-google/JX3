@@ -59,20 +59,28 @@
             const author = "JX3 觀察員";
             const date = new Date().toISOString().replace('T', ' ').split('.')[0];
 
-            const articleObj = {
+            // 1. 生成 Metadata (用於 data.js)
+            const metadataObj = {
                 id: String(Date.now()),
                 slug: slug,
                 title: title,
                 summary: summary,
                 author: author,
                 created_at: date,
-                content: content,
                 is_hidden: 0
             };
 
-            const jsonStr = JSON.stringify(articleObj, null, 4);
-            // 格式化為 JS 對象樣式
-            document.getElementById('output').innerText = jsonStr + ",";
+            const metadataStr = JSON.stringify(metadataObj, null, 4);
+            
+            document.getElementById('output').innerText = 
+                "// [步驟 1] 將此片段貼入 data.js 的 articles 陣列中：\n" + 
+                metadataStr + ",\n\n" +
+                "// [步驟 2] 將內容儲存為新檔案：\n" +
+                "// 檔案路徑: posts/" + slug + ".html\n" +
+                "// 檔案內容如下：\n" +
+                "------------------------------------------\n" +
+                content;
+
             document.getElementById('result-area').classList.remove('hidden');
             window.scrollTo(0, document.body.scrollHeight);
         }
