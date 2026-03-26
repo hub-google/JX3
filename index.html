@@ -17,7 +17,7 @@
     <style>
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background-color: #0f172a; /* 恢復深色背景 */
+            background-color: #0f172a; /* 恢复深色背景 */
             color: #e2e8f0;
             line-height: 1.8;
         }
@@ -96,7 +96,7 @@
             scripts.forEach(src => {
                 const s = document.createElement('script');
                 s.src = `${src}?v=${version}`;
-                s.async = false; // 確保按順序執行
+                s.async = false; // 确保按顺序执行
                 document.body.appendChild(s);
             });
         })();

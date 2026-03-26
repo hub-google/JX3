@@ -86,5 +86,5 @@ const JX3Blog = {
     }
 };
 
-// 使用立即執行函式確保安全載入
+// 使用立即执行函数确保安全载入
 window.addEventListener('load', () => JX3Blog.init());
