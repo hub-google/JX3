@@ -3,15 +3,15 @@
 const Templates = {
     home(articles) {
         const cards = articles.map(art => `
-            <article class="post-card p-10 mb-12 border-b border-slate-100 flex flex-col gap-4">
+            <article class="post-card p-10 mb-12 flex flex-col gap-4">
                 <div class="flex items-center gap-4 mb-2">
-                    <span class="text-[10px] bg-slate-100 px-3 py-1 rounded-full text-slate-500 font-black uppercase tracking-widest">${art.created_at.split(' ')[0]}</span>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">BY ${art.author}</span>
+                    <span class="text-[10px] bg-slate-900 text-amber-500 px-3 py-1 rounded-full font-black uppercase tracking-widest border border-slate-700">${art.created_at.split(' ')[0]}</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">BY ${art.author}</span>
                 </div>
-                <h2 class="text-3xl font-black text-slate-900 hover:text-amber-600 transition leading-tight">
+                <h2 class="text-3xl font-black text-white hover:text-amber-500 transition leading-tight">
                     <a href="?id=${art.id || art.slug}">${art.title}</a>
                 </h2>
-                <p class="text-slate-500 text-sm leading-loose line-clamp-3">${art.summary || '點擊閱讀完整內容...'}</p>
+                <p class="text-slate-400 text-sm leading-loose line-clamp-3">${art.summary || '點擊閱讀完整內容...'}</p>
                 <div class="mt-4">
                     <a href="?id=${art.id || art.slug}" class="text-xs font-black text-slate-900 uppercase border-b-2 border-amber-400 pb-1 hover:border-slate-900 transition">繼續閱讀</a>
                 </div>
@@ -51,10 +51,10 @@ const Templates = {
                     <div class="h-1 w-20 bg-amber-400"></div>
                 </header>
 
-                <!-- Post Content (Serif for reading) -->
-                <article class="prose prose-slate prose-lg max-w-none prose-serif mb-20 text-slate-800 leading-loose">
+                <!-- Post Content (Clean Canvas for Complex Reports) -->
+                <div class="max-w-none mb-20">
                     ${post.content}
-                </article>
+                </div>
 
                 <!-- Comments Section -->
                 <section class="border-t-2 border-slate-900 pt-20" id="comments">
