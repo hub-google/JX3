@@ -3,111 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JX3 Blog | 管理後台 (靜態版)</title>
+    <title>JX3 Blog | 管理工具 (靜態代碼生成)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #f1f5f9; font-family: sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-200 min-h-screen p-8">
+<body class="p-8">
     <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-12">
-            <h1 class="text-3xl font-black text-white hover:text-amber-500 transition cursor-pointer" onclick="location.href='/'">
-                <i class="fa-solid fa-gears mr-3 text-amber-500"></i>JX3 Blog Admin
-            </h1>
-            <a href="/" class="text-sm text-slate-400 hover:text-white"><i class="fa-solid fa-house mr-2"></i>返回首頁</a>
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-900">管理工具 (文章代碼生成器)</h1>
+            <a href="./" class="text-slate-500 hover:text-slate-900"><i class="fa-solid fa-arrow-left mr-2"></i>返回首頁</a>
+        </header>
+
+        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">文章標題</label>
+                <input type="text" id="title" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">短網址名 (Slug, 僅限英文與數字)</label>
+                <input type="text" id="slug" placeholder="e.g. pvp-report-01" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">摘要 (一兩句話)</label>
+                <textarea id="summary" rows="2" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">文章內文 (支援 HTML)</label>
+                <textarea id="content" rows="10" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500 font-mono text-sm" placeholder="<p>您的文章內容...</p>"></textarea>
+            </div>
+
+            <button onclick="generateCode()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-lg hover:bg-amber-600 transition">
+                生成 data.js 片段
+            </button>
         </div>
 
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
-            <h2 class="text-xl font-bold text-white mb-6">發布新文章</h2>
-            
-            <form id="admin-form" class="space-y-6">
-                <!-- 管理員驗證 -->
-                <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 mb-6">
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">管理員密鑰 (密碼)</label>
-                    <input type="password" id="admin-pass" required placeholder="預設為 JX3_ADMIN_2026" 
-                        class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章標題</label>
-                        <input type="text" id="title" required placeholder="例如：2026春節運營策略..." 
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">網址路徑 (Slug)</label>
-                        <input type="text" id="slug" placeholder="例如：cny-strategy-2026" 
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章簡介 (Summary)</label>
-                    <textarea id="summary" rows="2" placeholder="顯示在列表中的簡短預覽..." 
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">正文內容 (支援 HTML)</label>
-                    <textarea id="content" required rows="15" placeholder="請輸入文章 HTML 內容..." 
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm focus:border-amber-500 outline-none transition"></textarea>
-                </div>
-
-                <div class="flex justify-end gap-4 pt-4">
-                    <button type="reset" class="px-6 py-3 text-slate-400 hover:text-white transition">清空</button>
-                    <button type="submit" id="submit-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-10 py-3 rounded-lg transition shadow-lg flex items-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> 立即發布 (至 Supabase)
-                    </button>
-                </div>
-            </form>
+        <div id="result-area" class="mt-8 hidden">
+            <h2 class="text-xl font-bold mb-4 text-slate-900">生成的代碼 (請複製並貼上到 data.js)：</h2>
+            <pre id="output" class="bg-slate-900 text-amber-200 p-6 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap select-all"></pre>
+            <p class="text-sm text-slate-500 mt-4 italic">* 複製上面的代碼，貼進 `data.js` 的 `articles` 陣列中即可完成發布。</p>
         </div>
     </div>
 
     <script>
-        // --- 配置區 ---
-        const SUPABASE_URL = 'https://fanffwnhkxpfhttylntw.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_fsrieSLUXlq-_WDpPY9K_w_eO-dN_jT';
-        const DEFAULT_ADMIN_PASS = 'JX3_ADMIN_2026';
+        function generateCode() {
+            const title = document.getElementById('title').value;
+            const slug = document.getElementById('slug').value || Date.now();
+            const summary = document.getElementById('summary').value;
+            const content = document.getElementById('content').value;
+            const author = "JX3 觀察員";
+            const date = new Date().toISOString().replace('T', ' ').split('.')[0];
 
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-        const form = document.getElementById('admin-form');
-        const btn = document.getElementById('submit-btn');
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const pass = document.getElementById('admin-pass').value;
-            if (pass !== DEFAULT_ADMIN_PASS) {
-                alert('❌ 管理員密碼錯誤！');
-                return;
-            }
-
-            const payload = {
-                id: 'post_' + Date.now().toString(36),
-                title: document.getElementById('title').value,
-                slug: document.getElementById('slug').value || undefined,
-                summary: document.getElementById('summary').value,
-                content: document.getElementById('content').value,
-                created_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().replace(/T/, ' ').replace(/\..+/, '')
+            const articleObj = {
+                id: String(Date.now()),
+                slug: slug,
+                title: title,
+                summary: summary,
+                author: author,
+                created_at: date,
+                content: content,
+                is_hidden: 0
             };
 
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>發布中...';
-
-            try {
-                const { error } = await supabase.from('jx3_articles').insert([payload]);
-                if (error) throw error;
-                
-                alert('✅ 文章已成功發布到 Supabase！');
-                form.reset();
-            } catch (e) {
-                alert('系統錯誤：' + e.message + '\n請檢查 Anon Key 與 RLS 權限。');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> 立即發布 (至 Supabase)';
-            }
-        };
+            const jsonStr = JSON.stringify(articleObj, null, 4);
+            // 格式化為 JS 對象樣式
+            document.getElementById('output').innerText = jsonStr + ",";
+            document.getElementById('result-area').classList.remove('hidden');
+            window.scrollTo(0, document.body.scrollHeight);
+        }
     </script>
 </body>
 </html>
