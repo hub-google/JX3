@@ -3,7 +3,7 @@
 // --- 配置區 ---
 // 請在這裡填入您的 Supabase 資訊 (可在 Project Settings -> API 找到)
 const SUPABASE_URL = 'https://fanffwnhkxpfhttylntw.supabase.co';
-const SUPABASE_ANON_KEY = '請在此處填入您的_ANON_KEY'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_fsrieSLUXlq-_WDpPY9K_w_eO-dN_jT'; 
 
 // 初始化 Supabase 客戶端
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
