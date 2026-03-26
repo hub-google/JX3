@@ -3,27 +3,25 @@
 const Templates = {
     home(articles) {
         const cards = articles.map(art => `
-            <article class="post-card p-10 mb-12 flex flex-col gap-4">
-                <div class="flex items-center gap-4 mb-2">
+            <article class="post-card p-8 mb-8 flex flex-col gap-4">
+                <div class="flex items-center gap-4 mb-1">
                     <span class="text-[10px] bg-slate-900 text-amber-500 px-3 py-1 rounded-full font-black uppercase tracking-widest border border-slate-700">${art.created_at.split(' ')[0]}</span>
                     <span class="text-[10px] text-slate-300 font-bold uppercase tracking-widest">BY ${art.author}</span>
                 </div>
-                <h2 class="text-3xl font-black text-white hover:text-amber-500 transition leading-tight line-clamp-2">
+                <h2 class="text-2xl font-black text-white hover:text-amber-500 transition leading-tight">
                     <a href="posts/${art.slug}.html">${art.title}</a>
                 </h2>
-                <p class="text-slate-400 text-sm leading-loose line-clamp-3">${art.summary || '點擊閱讀完整內容...'}</p>
-                <div class="mt-4">
+                <p class="text-slate-400 text-sm leading-relaxed line-clamp-2">${art.summary || '點擊閱讀完整內容...'}</p>
+                <div class="mt-2">
                     <a href="posts/${art.slug}.html" class="text-xs font-black text-white uppercase border-b-2 border-amber-500/30 pb-1 hover:border-amber-500 transition">繼續閱讀 READ MORE</a>
                 </div>
             </article>
         `).join('');
 
         return `
-            <section class="max-w-6xl mx-auto px-4 py-20">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                    ${cards}
-                </div>
-            </section>
+            <div class="max-w-3xl mx-auto py-16 px-6">
+                ${cards}
+            </div>
         `;
     },
 
