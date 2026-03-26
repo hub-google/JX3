@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JX3 Blog | 管理後台</title>
+    <title>JX3 Blog | 管理後台 (靜態版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-900 text-slate-200 min-h-screen p-8">
     <div class="max-w-4xl mx-auto">
@@ -20,6 +21,13 @@
             <h2 class="text-xl font-bold text-white mb-6">發布新文章</h2>
             
             <form id="admin-form" class="space-y-6">
+                <!-- 管理員驗證 -->
+                <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 mb-6">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">管理員密鑰 (密碼)</label>
+                    <input type="password" id="admin-pass" required placeholder="預設為 JX3_ADMIN_2026" 
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none transition">
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">文章標題</label>
@@ -48,7 +56,7 @@
                 <div class="flex justify-end gap-4 pt-4">
                     <button type="reset" class="px-6 py-3 text-slate-400 hover:text-white transition">清空</button>
                     <button type="submit" id="submit-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-10 py-3 rounded-lg transition shadow-lg flex items-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> 立即發布
+                        <i class="fa-solid fa-paper-plane"></i> 立即發布 (至 Supabase)
                     </button>
                 </div>
             </form>
@@ -56,44 +64,48 @@
     </div>
 
     <script>
+        // --- 配置區 ---
+        const SUPABASE_URL = 'https://fanffwnhkxpfhttylntw.supabase.co';
+        const SUPABASE_ANON_KEY = '請在此處填入您的_ANON_KEY';
+        const DEFAULT_ADMIN_PASS = 'JX3_ADMIN_2026';
+
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
         const form = document.getElementById('admin-form');
         const btn = document.getElementById('submit-btn');
 
         form.onsubmit = async (e) => {
             e.preventDefault();
             
+            const pass = document.getElementById('admin-pass').value;
+            if (pass !== DEFAULT_ADMIN_PASS) {
+                alert('❌ 管理員密碼錯誤！');
+                return;
+            }
+
             const payload = {
+                id: 'post_' + Date.now().toString(36),
                 title: document.getElementById('title').value,
-                slug: document.getElementById('slug').value,
+                slug: document.getElementById('slug').value || undefined,
                 summary: document.getElementById('summary').value,
-                content: document.getElementById('content').value
+                content: document.getElementById('content').value,
+                created_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().replace(/T/, ' ').replace(/\..+/, '')
             };
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>處理中...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>發布中...';
 
             try {
-                // Request will trigger browser's Basic Auth prompt due to 401 response from server
-                const res = await fetch('/api/admin/articles', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    alert('✅ 文章已成功發布！');
-                    form.reset();
-                } else if (res.status === 401) {
-                    alert('❌ 未經授權，請重新整理頁面並輸入管理員帳密。');
-                } else {
-                    const err = await res.json();
-                    alert('❌ 錯誤：' + err.error);
-                }
+                const { error } = await supabase.from('JX3_Articles').insert([payload]);
+                if (error) throw error;
+                
+                alert('✅ 文章已成功發布到 Supabase！');
+                form.reset();
             } catch (e) {
-                alert('系統錯誤：' + e.message);
+                alert('系統錯誤：' + e.message + '\n請檢查 Anon Key 與 RLS 權限。');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> 立即發布';
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> 立即發布 (至 Supabase)';
             }
         };
     </script>
