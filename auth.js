@@ -2,12 +2,13 @@
 
 // TODO: 將下方的 firebaseConfig 替換為您自己的 Firebase 專案設定！
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "your-project.firebaseapp.com",
-    projectId: "your-project",
-    storageBucket: "your-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
+  apiKey: "AIzaSyCZkppM0DHmqmalAWO__G2zlh9g6clUY20",
+  authDomain: "sign-a70b0.firebaseapp.com",
+  projectId: "sign-a70b0",
+  storageBucket: "sign-a70b0.firebasestorage.app",
+  messagingSenderId: "151361216524",
+  appId: "1:151361216524:web:87728f686c5b56530ece29",
+  measurementId: "G-1X9YMN4QM1"
 };
 
 // Initialize Firebase only if not already initialized
