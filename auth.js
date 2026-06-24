@@ -105,20 +105,22 @@ const Auth = {
             // Send verification email
             await userCredential.user.sendEmailVerification();
             
-            // Show success message, wait a bit, then close
+            // Show success message, DO NOT close the modal automatically
             successEl.classList.remove('hidden');
-            setTimeout(() => {
-                this.closeModal();
-                // Because email isn't verified yet, they are logged out automatically by our onAuthStateChanged logic
-                firebase.auth().signOut();
-            }, 3000);
+            
+            // Log out the unverified user so they can't bypass via console
+            firebase.auth().signOut();
+            
+            // Re-enable button in case they want to close it manually
+            btnEl.disabled = false;
+            btnEl.textContent = "建立帐号并发送验证信";
             
         } catch (error) {
             btnEl.disabled = false;
             btnEl.textContent = "建立帐号并发送验证信";
             
             if (error.code === 'auth/email-already-in-use') {
-                errorEl.textContent = '此信箱已被注册。';
+                errorEl.innerHTML = '此信箱已被注册。如果您尚未验证，请切换到「登入」画面，即可重新发送验证信。';
             } else if (error.code === 'auth/weak-password') {
                 errorEl.textContent = '密码强度不足，请至少输入 6 个字元。';
             } else {
@@ -143,9 +145,10 @@ const Auth = {
             const userCredential = await firebase.auth().signInWithEmailAndPassword(emailInput, passwordInput);
             
             if (!userCredential.user.emailVerified) {
-                errorEl.textContent = '您的信箱尚未验证，请至信箱点击验证连结。';
+                errorEl.innerHTML = '您的信箱尚未验证，请至信箱点击验证连结。<br><a href="#" onclick="Auth.resendVerification(event)" class="text-amber-500 hover:text-white underline mt-2 inline-block">没收到信？点击重发验证信</a>';
                 errorEl.classList.remove('hidden');
-                await firebase.auth().signOut();
+                // We intentionally do NOT sign out immediately, so they can click the resend button
+                // (The UI still treats them as logged out due to onAuthStateChanged logic)
                 btnEl.disabled = false;
                 btnEl.textContent = "登入";
                 return;
@@ -170,6 +173,115 @@ const Auth = {
             await firebase.auth().signOut();
         } catch (error) {
             console.error("Sign out error", error);
+        }
+    },
+
+    async resendVerification(e) {
+        e.preventDefault();
+        const user = firebase.auth().currentUser;
+        const errorEl = document.getElementById('login-error');
+        
+        if (user && !user.emailVerified) {
+            try {
+                await user.sendEmailVerification();
+                errorEl.innerHTML = '<span class="text-green-500">验证信已重新发送！请检查信箱（包含垃圾信件匣）。</span>';
+                // Sign out after resending
+                await firebase.auth().signOut();
+            } catch (error) {
+                if (error.code === 'auth/too-many-requests') {
+                    errorEl.innerHTML = '发送太频繁，请稍后再试。';
+                } else {
+                    errorEl.innerHTML = '发送失败，请稍后再试。';
+                }
+            }
+        } else {
+            errorEl.innerHTML = '無法發送驗證信，請重新嘗試登入。';
+        }
+    },
+
+    openProfileModal() {
+        if (!this.currentUser) return;
+        const authSection = document.getElementById('auth-section');
+        const modalHtml = Templates.profileModal(this.currentUser);
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    async handleUpdateProfile(e) {
+        e.preventDefault();
+        const newName = document.getElementById('profile-nickname').value.trim();
+        const btnEl = document.getElementById('profile-btn');
+        const errorEl = document.getElementById('profile-error');
+        const successEl = document.getElementById('profile-success');
+        
+        errorEl.classList.add('hidden');
+        successEl.classList.add('hidden');
+        btnEl.disabled = true;
+        btnEl.textContent = "更新中...";
+
+        try {
+            const user = firebase.auth().currentUser;
+            
+            // 1. Update Firebase Auth Profile
+            await user.updateProfile({ displayName: newName });
+            
+            // 2. Update all old comments in Firestore (Option A)
+            const db = firebase.firestore();
+            const commentsRef = db.collection('comments');
+            const snapshot = await commentsRef.where('uid', '==', user.uid).get();
+            
+            if (!snapshot.empty) {
+                const batch = db.batch();
+                snapshot.docs.forEach((doc) => {
+                    batch.update(doc.ref, { username: newName });
+                });
+                await batch.commit();
+            }
+
+            // 3. Update local UI state
+            this.currentUser.username = newName;
+            this.updateUI();
+
+            successEl.classList.remove('hidden');
+        } catch (error) {
+            console.error(error);
+            errorEl.textContent = '更新失敗：' + error.message;
+            errorEl.classList.remove('hidden');
+        } finally {
+            btnEl.disabled = false;
+            btnEl.textContent = "更新暱稱";
+        }
+    },
+
+    async handleUpdatePassword(e) {
+        e.preventDefault();
+        const newPassword = document.getElementById('profile-password').value;
+        const btnEl = document.getElementById('password-btn');
+        const errorEl = document.getElementById('password-error');
+        const successEl = document.getElementById('password-success');
+        
+        errorEl.classList.add('hidden');
+        successEl.classList.add('hidden');
+        btnEl.disabled = true;
+        btnEl.textContent = "修改中...";
+
+        try {
+            const user = firebase.auth().currentUser;
+            await user.updatePassword(newPassword);
+            successEl.classList.remove('hidden');
+            document.getElementById('update-password-form').reset();
+        } catch (error) {
+            console.error(error);
+            if (error.code === 'auth/requires-recent-login') {
+                errorEl.innerHTML = '基於安全考量，請<a href="#" onclick="Auth.logout(); Auth.closeModal();" class="underline text-amber-500">登出並重新登入</a>後，再修改密碼。';
+            } else if (error.code === 'auth/weak-password') {
+                errorEl.textContent = '密碼強度不足，請至少輸入 6 個字元。';
+            } else {
+                errorEl.textContent = '修改失敗：' + error.message;
+            }
+            errorEl.classList.remove('hidden');
+        } finally {
+            btnEl.disabled = false;
+            btnEl.textContent = "確認修改密碼";
         }
     }
 };

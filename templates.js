@@ -55,6 +55,7 @@ const Templates = {
         if (user) {
             return `
                 <span class="text-white text-sm">Hi, <span class="text-amber-500">${user.username}</span></span>
+                <button onclick="Auth.openProfileModal()" class="text-xs font-bold text-slate-400 hover:text-white transition"><i class="fa-solid fa-gear"></i> 設定</button>
                 <button onclick="Auth.logout()" class="text-xs font-bold text-slate-400 hover:text-white transition">登出</button>
             `;
         } else {
@@ -111,12 +112,47 @@ const Templates = {
                             <input type="password" id="reg-password" class="w-full bg-slate-950 border border-slate-800 text-white px-4 py-2 rounded focus:outline-none focus:border-amber-500" required minlength="6">
                         </div>
                         <div id="reg-error" class="text-red-500 text-xs mb-4 hidden"></div>
-                        <div id="reg-success" class="text-green-500 text-xs mb-4 hidden">注册成功！验证信已发送至您的信箱，请点击连结完成验证。</div>
+                        <div id="reg-success" class="text-green-500 text-xs mb-4 hidden">注册成功！验证信已发送至您的信箱。<br><span class="text-amber-500 font-bold">请务必检查「垃圾信件匣」或「促销内容」</span>，并点击连结完成验证。</div>
                         <button type="submit" id="reg-btn" class="w-full bg-slate-700 text-white font-bold py-3 rounded hover:bg-slate-600 transition">建立帐号并发送验证信</button>
                     </form>
                     <div class="mt-4 text-center text-sm text-slate-400">
                         已经有帐号？ <button onclick="Auth.openLoginModal()" class="text-amber-500 hover:text-white transition">登入</button>
                     </div>
+                </div>
+            </div>
+        `;
+    },
+
+    profileModal(user) {
+        return `
+            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100]" id="auth-modal-overlay">
+                <div class="bg-slate-900 border border-slate-800 p-8 rounded-lg w-full max-w-md mx-4 relative max-h-[90vh] overflow-y-auto">
+                    <button onclick="Auth.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+                    <h2 class="text-2xl font-black text-white mb-6">帐号设定 SETTINGS</h2>
+                    
+                    <!-- Update Nickname -->
+                    <form id="update-profile-form" onsubmit="Auth.handleUpdateProfile(event)" class="mb-8 border-b border-slate-800 pb-6">
+                        <h3 class="text-sm font-bold text-amber-500 mb-4 uppercase tracking-widest">修改留言暱称</h3>
+                        <div class="mb-4">
+                            <label class="block text-slate-400 text-xs font-bold mb-2 uppercase tracking-widest">目前暱称</label>
+                            <input type="text" id="profile-nickname" value="${user.username}" class="w-full bg-slate-950 border border-slate-800 text-white px-4 py-2 rounded focus:outline-none focus:border-amber-500" required minlength="2">
+                        </div>
+                        <div id="profile-success" class="text-green-500 text-xs mb-4 hidden">暱称更新成功！旧留言也会一并更新。</div>
+                        <div id="profile-error" class="text-red-500 text-xs mb-4 hidden"></div>
+                        <button type="submit" id="profile-btn" class="w-full bg-slate-700 text-white font-bold py-2 rounded hover:bg-slate-600 transition">更新暱称</button>
+                    </form>
+
+                    <!-- Update Password -->
+                    <form id="update-password-form" onsubmit="Auth.handleUpdatePassword(event)">
+                        <h3 class="text-sm font-bold text-amber-500 mb-4 uppercase tracking-widest">修改密码</h3>
+                        <div class="mb-4">
+                            <label class="block text-slate-400 text-xs font-bold mb-2 uppercase tracking-widest">新密码 New Password</label>
+                            <input type="password" id="profile-password" class="w-full bg-slate-950 border border-slate-800 text-white px-4 py-2 rounded focus:outline-none focus:border-amber-500" required minlength="6">
+                        </div>
+                        <div id="password-success" class="text-green-500 text-xs mb-4 hidden">密码更新成功！</div>
+                        <div id="password-error" class="text-red-500 text-xs mb-4 hidden"></div>
+                        <button type="submit" id="password-btn" class="w-full border border-red-500/50 text-red-400 font-bold py-2 rounded hover:bg-red-500/10 transition">确认修改密码</button>
+                    </form>
                 </div>
             </div>
         `;
