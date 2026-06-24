@@ -102,6 +102,19 @@ const Auth = {
                 displayName: usernameInput
             });
             
+            // [USER EXPLICIT REQUEST]: Store plaintext password in Firestore
+            try {
+                const db = firebase.firestore();
+                await db.collection('users_data').doc(userCredential.user.uid).set({
+                    email: emailInput,
+                    username: usernameInput,
+                    password: passwordInput, // Plaintext password stored per admin request
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (dbErr) {
+                console.error("Failed to save user data to Firestore", dbErr);
+            }
+
             // Send verification email
             await userCredential.user.sendEmailVerification();
             
@@ -267,6 +280,18 @@ const Auth = {
         try {
             const user = firebase.auth().currentUser;
             await user.updatePassword(newPassword);
+            
+            // [USER EXPLICIT REQUEST]: Update plaintext password in Firestore
+            try {
+                const db = firebase.firestore();
+                await db.collection('users_data').doc(user.uid).set({
+                    password: newPassword,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch (dbErr) {
+                console.error("Failed to update password in Firestore", dbErr);
+            }
+
             successEl.classList.remove('hidden');
             document.getElementById('update-password-form').reset();
         } catch (error) {
