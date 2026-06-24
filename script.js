@@ -78,6 +78,11 @@ const JX3Blog = {
                 // 加入淡入效果
                 bodyDiv.classList.add('fade-in');
             }
+
+            // Initialize Comments for this article
+            if (typeof Comments !== 'undefined') {
+                Comments.init(post.id || post.slug);
+            }
         } catch (err) {
             console.error(err);
             const bodyDiv = document.getElementById('post-body');

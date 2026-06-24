@@ -68,6 +68,9 @@
             
             <nav class="flex items-center gap-6 text-sm font-bold text-slate-400">
                 <a href="https://hub-google.github.io/JX3/" class="hover:text-amber-500 transition">首页</a>
+                <div id="auth-section" class="flex items-center gap-4 border-l border-slate-700 pl-6 ml-2">
+                    <!-- Auth UI injected by auth.js -->
+                </div>
             </nav>
         </div>
     </header>
@@ -88,11 +91,19 @@
         </div>
     </footer>
 
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <!-- Firebase SDK (v8 compat for simpler CDN usage) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <!-- Core Dependencies with Automatic Cache Buster -->
     <script>
         (function() {
             const version = Date.now();
-            const scripts = ['data.js', 'templates.js', 'script.js'];
+            const scripts = ['data.js', 'templates.js', 'auth.js', 'comments.js', 'script.js'];
             scripts.forEach(src => {
                 const s = document.createElement('script');
                 s.src = `${src}?v=${version}`;
