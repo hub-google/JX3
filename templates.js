@@ -8,11 +8,11 @@ const Templates = {
                     <span class="text-[10px] bg-slate-900 text-amber-500 px-3 py-1 rounded-full font-black uppercase tracking-widest border border-slate-700">${art.created_at.split(' ')[0]}</span>
                 </div>
                 <h2 class="text-2xl font-black text-white hover:text-amber-500 transition leading-tight">
-                    <a href="posts/${art.slug}.html">${art.title}</a>
+                    <a href="?id=${art.slug || art.id}">${art.title}</a>
                 </h2>
                 <p class="text-slate-400 text-sm leading-relaxed line-clamp-2">${art.summary || '点击阅读完整内容...'}</p>
                 <div class="mt-2">
-                    <a href="posts/${art.slug}.html" class="text-xs font-black text-white uppercase border-b-2 border-amber-500/30 pb-1 hover:border-amber-500 transition">继续阅读 READ MORE</a>
+                    <a href="?id=${art.slug || art.id}" class="text-xs font-black text-white uppercase border-b-2 border-amber-500/30 pb-1 hover:border-amber-500 transition">继续阅读 READ MORE</a>
                 </div>
             </article>
         `).join('');
