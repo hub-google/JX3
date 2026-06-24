@@ -174,6 +174,6 @@ const Auth = {
     }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
     Auth.init();
 });
