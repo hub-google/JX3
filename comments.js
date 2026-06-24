@@ -35,17 +35,28 @@ const Comments = {
         // Listen to Firestore
         this.unsubscribe = db.collection('comments')
             .where('articleId', '==', this.currentArticleId)
-            .orderBy('timestamp', 'asc')
             .onSnapshot((snapshot) => {
                 const comments = [];
                 snapshot.forEach((doc) => {
                     comments.push({ id: doc.id, ...doc.data() });
                 });
+                
+                // Sort locally by timestamp to avoid Firestore composite index requirement
+                comments.sort((a, b) => {
+                    const timeA = a.timestamp ? (a.timestamp.toDate ? a.timestamp.toDate().getTime() : new Date(a.timestamp).getTime()) : 0;
+                    const timeB = b.timestamp ? (b.timestamp.toDate ? b.timestamp.toDate().getTime() : new Date(b.timestamp).getTime()) : 0;
+                    return timeA - timeB;
+                });
+                
                 this.renderComments(comments);
             }, (error) => {
                 console.error("Error fetching comments: ", error);
-                // If it fails (e.g. index missing or permission error), show a message
-                listContainer.innerHTML = '<div class="text-red-400 text-sm py-4 text-center border border-slate-800 border-dashed rounded-lg">Firebase 設定錯誤或尚未完成 Config 替換，留言功能暫時無法使用。</div>';
+                // Provide a more detailed error message
+                if (error.code === 'permission-denied') {
+                    listContainer.innerHTML = '<div class="text-red-400 text-sm py-4 text-center border border-slate-800 border-dashed rounded-lg">Firebase 資料庫讀取權限不足，請至控制台修改 Rules。</div>';
+                } else {
+                    listContainer.innerHTML = '<div class="text-red-400 text-sm py-4 text-center border border-slate-800 border-dashed rounded-lg">Firebase 發生錯誤：' + error.message + '</div>';
+                }
             });
     },
 
