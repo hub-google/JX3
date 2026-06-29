@@ -39,7 +39,9 @@ const JX3Blog = {
             return;
         }
 
-        const articles = window.JX3_DATA.articles.filter(a => a.is_hidden != 1);
+        const articles = window.JX3_DATA.articles
+            .filter(a => a.is_hidden != 1)
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         console.log("Visible articles found:", articles.length);
         
         if (!articles || articles.length === 0) {

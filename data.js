@@ -1,5 +1,6 @@
 // JX3 Blog Static Data - Metadata Only Version
 const JX3_DATA = {
+    adminEmails: ["cyt18@gmail.com", "cyt18.tw@gmail.com"],
     articles: [
         {
             id: 1,

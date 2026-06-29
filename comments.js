@@ -66,19 +66,150 @@ const Comments = {
 
         if (comments.length === 0) {
             listContainer.innerHTML = '<div class="text-slate-500 text-sm py-8 text-center border border-slate-800 border-dashed rounded-lg">暂无留言，抢先头香吧！</div>';
-        } else {
-            let html = '<div class="mt-4">';
-            comments.forEach(c => {
-                // Ensure date formatting works with Firebase Timestamp or ISO string
-                const timeStr = c.timestamp && c.timestamp.toDate ? c.timestamp.toDate().toISOString() : c.timestamp;
-                const commentData = {
-                    ...c,
-                    timestamp: timeStr || new Date().toISOString()
-                };
-                html += Templates.commentItem(commentData);
+            return;
+        }
+
+        // Build the nested tree
+        const topLevelComments = [];
+        const commentMap = {};
+
+        // 1. Map all comments
+        comments.forEach(c => {
+            commentMap[c.id] = {
+                ...c,
+                replies: [],
+                floorPath: ''
+            };
+        });
+
+        // 2. Build relationships
+        comments.forEach(c => {
+            const mapped = commentMap[c.id];
+            if (!c.parentId) {
+                topLevelComments.push(mapped);
+                mapped.floorPath = String(topLevelComments.length);
+            } else {
+                const parent = commentMap[c.parentId];
+                if (parent) {
+                    parent.replies.push(mapped);
+                } else {
+                    // Fallback to top-level if parent is missing
+                    topLevelComments.push(mapped);
+                    mapped.floorPath = String(topLevelComments.length);
+                }
+            }
+        });
+
+        // 3. Assign floorPaths recursively to replies
+        const assignFloorPaths = (comment, parentPath) => {
+            comment.replies.forEach((reply, idx) => {
+                reply.floorPath = `${parentPath}-${idx + 1}`;
+                assignFloorPaths(reply, reply.floorPath);
             });
-            html += '</div>';
-            listContainer.innerHTML = html;
+        };
+
+        topLevelComments.forEach(c => {
+            assignFloorPaths(c, c.floorPath);
+        });
+
+        // 4. Flatten the tree for rendering in depth-first order
+        const flatRenderedList = [];
+        const traverse = (comment, depth) => {
+            flatRenderedList.push({ comment, depth });
+            comment.replies.forEach(r => traverse(r, depth + 1));
+        };
+
+        topLevelComments.forEach(c => traverse(c, 0));
+
+        // 5. Generate HTML
+        let html = '<div class="mt-4">';
+        flatRenderedList.forEach(({ comment, depth }) => {
+            const timeStr = comment.timestamp && comment.timestamp.toDate ? comment.timestamp.toDate().toISOString() : comment.timestamp;
+            const commentData = {
+                ...comment,
+                timestamp: timeStr || new Date().toISOString()
+            };
+            html += Templates.commentItem(commentData, depth);
+        });
+        html += '</div>';
+
+        listContainer.innerHTML = html;
+    },
+
+    isAdmin() {
+        const adminEmails = (window.JX3_DATA && window.JX3_DATA.adminEmails) || ["cyt18@gmail.com", "cyt18.tw@gmail.com"];
+        return Auth.currentUser && adminEmails.includes(Auth.currentUser.email);
+    },
+
+    showReplyForm(parentId) {
+        if (!Auth.currentUser) {
+            Auth.openLoginModal();
+            return;
+        }
+
+        const container = document.getElementById(`reply-form-${parentId}`);
+        if (!container) return;
+
+        if (container.classList.contains('hidden')) {
+            container.classList.remove('hidden');
+            const showAdminCheckbox = this.isAdmin();
+            container.innerHTML = `
+                <form onsubmit="Comments.submitReply(event, '${parentId}')" class="mt-2 bg-slate-900/50 p-4 border border-slate-800 rounded-lg">
+                    <textarea id="reply-input-${parentId}" rows="2" class="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 rounded text-sm focus:outline-none focus:border-amber-500 mb-2" placeholder="回覆此留言..." required></textarea>
+                    <div class="flex justify-between items-center flex-wrap gap-2">
+                        <span class="text-xs text-slate-500">以 <span class="text-amber-500 font-bold">${Auth.currentUser.username}</span> 的身分回覆</span>
+                        <div class="flex gap-2 items-center">
+                            ${showAdminCheckbox ? `<label class="flex items-center gap-1.5 text-xs text-amber-500 select-none mr-2 font-bold cursor-pointer"><input type="checkbox" id="reply-as-admin-${parentId}" class="accent-amber-500"> 站長回覆</label>` : ''}
+                            <button type="button" onclick="Comments.hideReplyForm('${parentId}')" class="text-slate-400 hover:text-white px-3 py-1 text-xs">取消</button>
+                            <button type="submit" class="bg-amber-600 text-white px-4 py-1.5 rounded text-xs font-bold hover:bg-amber-500 transition">送出</button>
+                        </div>
+                    </div>
+                </form>
+            `;
+        } else {
+            this.hideReplyForm(parentId);
+        }
+    },
+
+    hideReplyForm(parentId) {
+        const container = document.getElementById(`reply-form-${parentId}`);
+        if (container) {
+            container.classList.add('hidden');
+            container.innerHTML = '';
+        }
+    },
+
+    async submitReply(e, parentId) {
+        e.preventDefault();
+        if (!Auth.currentUser) {
+            Auth.openLoginModal();
+            return;
+        }
+
+        const inputEl = document.getElementById(`reply-input-${parentId}`);
+        const content = inputEl.value.trim();
+        if (!content || !this.currentArticleId) return;
+
+        const asAdminCheckbox = document.getElementById(`reply-as-admin-${parentId}`);
+        const asAdmin = asAdminCheckbox ? asAdminCheckbox.checked : false;
+
+        const db = firebase.firestore();
+
+        try {
+            await db.collection('comments').add({
+                articleId: this.currentArticleId,
+                parentId: parentId,
+                username: Auth.currentUser.username,
+                uid: Auth.currentUser.uid,
+                content: content,
+                isAdminReply: asAdmin,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            this.hideReplyForm(parentId);
+        } catch (error) {
+            console.error("Error adding reply comment: ", error);
+            alert("留言失敗，請稍候重試。");
         }
     },
 
@@ -109,14 +240,19 @@ const Comments = {
         
         if (!content || !this.currentArticleId) return;
 
+        const asAdminCheckbox = document.getElementById('comment-as-admin');
+        const asAdmin = asAdminCheckbox ? asAdminCheckbox.checked : false;
+
         const db = firebase.firestore();
         
         try {
             await db.collection('comments').add({
                 articleId: this.currentArticleId,
+                parentId: null,
                 username: Auth.currentUser.username,
                 uid: Auth.currentUser.uid,
                 content: content,
+                isAdminReply: asAdmin,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             

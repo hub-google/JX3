@@ -159,13 +159,17 @@ const Templates = {
     },
 
     commentForm() {
+        const isAdmin = Comments.isAdmin();
         return `
             <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg mb-8">
                 <form onsubmit="Comments.submitComment(event)">
                     <textarea id="comment-input" rows="3" class="w-full bg-slate-950 border border-slate-800 text-white px-4 py-3 rounded focus:outline-none focus:border-amber-500 mb-3" placeholder="写下你的想法..." required></textarea>
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center flex-wrap gap-3">
                         <span class="text-xs text-slate-500">以 <span class="text-amber-500 font-bold" id="comment-username-display"></span> 的身份留言</span>
-                        <button type="submit" class="bg-amber-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-amber-500 transition">送出留言</button>
+                        <div class="flex items-center gap-3">
+                            ${isAdmin ? `<label class="flex items-center gap-1.5 text-xs text-amber-500 select-none mr-2 font-bold cursor-pointer"><input type="checkbox" id="comment-as-admin" class="accent-amber-500"> 以站長身分回覆</label>` : ''}
+                            <button type="submit" class="bg-amber-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-amber-500 transition">送出留言</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -181,20 +185,40 @@ const Templates = {
         `;
     },
 
-    commentItem(comment) {
+    commentItem(c, depth) {
+        const indent = Math.min(depth, 4) * 24;
+        const isWebmaster = c.isAdminReply === true;
+        const borderClass = isWebmaster ? 'border-amber-500/40 bg-amber-500/5' : 'border-slate-800/50';
+        const badge = isWebmaster ? '<span class="bg-amber-500 text-slate-950 text-[10px] px-1.5 py-0.5 rounded font-black ml-2">站長</span>' : '';
+        const nameColor = isWebmaster ? 'text-amber-400 font-black' : 'text-slate-300 font-bold';
+        
         return `
-            <div class="border-b border-slate-800/50 py-4 last:border-0">
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-amber-500 font-bold text-sm">
-                        ${comment.username.charAt(0).toUpperCase()}
+            <div class="py-4 border border-x-0 border-t-0 ${borderClass} px-3 mb-2 transition" style="margin-left: ${indent}px; border-left-width: ${depth > 0 ? '2px' : '0px'}; border-left-color: ${isWebmaster ? '#fbbf24' : '#334155'};">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full ${isWebmaster ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-amber-500'} flex items-center justify-center font-bold text-sm border ${isWebmaster ? 'border-amber-400' : 'border-slate-700'}">
+                            ${isWebmaster ? '站' : c.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="text-sm flex items-center">
+                                <span class="${nameColor}">${isWebmaster ? '站長' : c.username}</span>
+                                ${badge}
+                            </div>
+                            <div class="text-slate-500 text-[10px]">${new Date(c.timestamp).toLocaleString()}</div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="text-white text-sm font-bold">${comment.username}</div>
-                        <div class="text-slate-500 text-[10px]">${new Date(comment.timestamp).toLocaleString()}</div>
-                    </div>
+                    <span class="text-xs text-slate-500 bg-slate-900 px-2 py-0.5 rounded font-mono">${c.floorPath || '1'} 樓</span>
                 </div>
-                <div class="text-slate-300 text-sm leading-relaxed pl-11">
-                    ${comment.content.replace(/\n/g, '<br>')}
+                <div class="text-slate-300 text-sm leading-relaxed pl-11 pr-4">
+                    ${c.content.replace(/\n/g, '<br>')}
+                </div>
+                <div class="pl-11 mt-3 flex items-center gap-4">
+                    <button onclick="Comments.showReplyForm('${c.id}')" class="text-[11px] text-slate-500 hover:text-amber-500 transition flex items-center gap-1 font-bold">
+                        <i class="fa-solid fa-reply"></i> 回覆
+                    </button>
+                </div>
+                <div id="reply-form-${c.id}" class="mt-3 pl-11 hidden">
+                    <!-- Inline reply form injected here -->
                 </div>
             </div>
         `;
