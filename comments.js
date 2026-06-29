@@ -3,10 +3,52 @@
 const Comments = {
     currentArticleId: null,
     unsubscribe: null,
+    ipInfoPromise: null,
 
     init(articleId) {
         this.currentArticleId = articleId;
+        this.getIpInfo(); // Trigger fetching IP info early
         this.listenForComments();
+    },
+
+    getIpInfo() {
+        if (this.ipInfoPromise) return this.ipInfoPromise;
+
+        this.ipInfoPromise = (async () => {
+            // Try freeipapi.com first
+            try {
+                const res = await fetch('https://freeipapi.com/api/json');
+                if (res.ok) {
+                    const data = await res.json();
+                    return {
+                        ip: data.ipAddress || '',
+                        location: data.cityName || data.regionName || data.countryName || ''
+                    };
+                }
+            } catch (e) {
+                console.warn("Failed to fetch from freeipapi, trying fallback...", e);
+            }
+
+            // Try ipwho.is as fallback
+            try {
+                const res = await fetch('https://ipwho.is/');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        return {
+                            ip: data.ip || '',
+                            location: data.city || data.region || data.country || ''
+                        };
+                    }
+                }
+            } catch (e) {
+                console.warn("Failed to fetch from ipwho.is", e);
+            }
+
+            return { ip: '', location: '' };
+        })();
+
+        return this.ipInfoPromise;
     },
 
     listenForComments() {
@@ -195,6 +237,16 @@ const Comments = {
 
         const db = firebase.firestore();
 
+        let ip = '';
+        let location = '';
+        try {
+            const ipInfo = await this.getIpInfo();
+            ip = ipInfo.ip;
+            location = ipInfo.location;
+        } catch (error) {
+            console.error("Failed to fetch IP info on submit reply:", error);
+        }
+
         try {
             await db.collection('comments').add({
                 articleId: this.currentArticleId,
@@ -203,6 +255,8 @@ const Comments = {
                 uid: Auth.currentUser.uid,
                 content: content,
                 isAdminReply: asAdmin,
+                ip: ip,
+                location: location,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
@@ -244,6 +298,16 @@ const Comments = {
         const asAdmin = asAdminCheckbox ? asAdminCheckbox.checked : false;
 
         const db = firebase.firestore();
+
+        let ip = '';
+        let location = '';
+        try {
+            const ipInfo = await this.getIpInfo();
+            ip = ipInfo.ip;
+            location = ipInfo.location;
+        } catch (error) {
+            console.error("Failed to fetch IP info on submit comment:", error);
+        }
         
         try {
             await db.collection('comments').add({
@@ -253,6 +317,8 @@ const Comments = {
                 uid: Auth.currentUser.uid,
                 content: content,
                 isAdminReply: asAdmin,
+                ip: ip,
+                location: location,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             

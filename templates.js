@@ -192,6 +192,15 @@ const Templates = {
         const badge = isWebmaster ? '<span class="bg-amber-500 text-slate-950 text-[10px] px-1.5 py-0.5 rounded font-black ml-2">站長</span>' : '';
         const nameColor = isWebmaster ? 'text-amber-400 font-black' : 'text-slate-300 font-bold';
         
+        const date = new Date(c.timestamp);
+        let timeFormatted = '';
+        if (!isNaN(date.getTime())) {
+            const pad = (n) => String(n).padStart(2, '0');
+            timeFormatted = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        } else {
+            timeFormatted = c.timestamp;
+        }
+
         return `
             <div class="py-4 border border-x-0 border-t-0 ${borderClass} px-3 mb-2 transition" style="margin-left: ${indent}px; border-left-width: ${depth > 0 ? '2px' : '0px'}; border-left-color: ${isWebmaster ? '#fbbf24' : '#334155'};">
                 <div class="flex justify-between items-start mb-2">
@@ -204,7 +213,10 @@ const Templates = {
                                 <span class="${nameColor}">${isWebmaster ? '站長' : c.username}</span>
                                 ${badge}
                             </div>
-                            <div class="text-slate-500 text-[10px]">${new Date(c.timestamp).toLocaleString()}</div>
+                            <div class="text-slate-500 text-[10px] flex flex-wrap gap-x-2 gap-y-0.5">
+                                <span>${timeFormatted}</span>
+                                ${c.ip ? `<span>• IP: ${c.ip}${c.location ? ` (${c.location})` : ''}</span>` : ''}
+                            </div>
                         </div>
                     </div>
                     <span class="text-xs text-slate-500 bg-slate-900 px-2 py-0.5 rounded font-mono">${c.floorPath || '1'} 樓</span>
