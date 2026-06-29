@@ -57,6 +57,11 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Hide standalone post header & footer when embedded in SPA */
+        #post-body header, #post-body footer {
+            display: none;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-amber-200">
