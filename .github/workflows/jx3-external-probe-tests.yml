@@ -1,0 +1,32 @@
+name: JX3 external probe offline checks
+on:
+  push:
+    paths:
+      - 'external-probe/**'
+      - '.github/workflows/jx3-external-probe-tests.yml'
+  workflow_dispatch:
+jobs:
+  windows-tests:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: external-probe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          architecture: 'x64'
+      - name: Compile Python modules
+        run: python -m compileall -q .
+      - name: Offline and owned-child-process integration tests
+        run: python -m unittest discover -s tests -v
+      - name: One-click diagnostic dry-run
+        run: python diagnose.py
+      - name: Upload diagnostic results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jx3-external-probe-diagnostics
+          path: external-probe/diagnostics/*.json
+          if-no-files-found: ignore
