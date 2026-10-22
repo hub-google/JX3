@@ -1,0 +1,7 @@
+Environment: Linux x86_64 Python 3.13.5 on 2026-10-22.
+Result: 6 synthetic unit tests passed; 1 Windows OS integration test SKIPPED (not a Windows host).
+Compileall: PASS. JSON config: PASS. diagnose.py (offline): PASS.
+Windows OpenProcess/ReadProcessMemory: NOT TESTED here.
+Live JX3 anti-cheat/process access: NOT TESTED.
+Live JX3 data correctness or safety: NOT TESTED.
+This report does not attest to game compatibility.
