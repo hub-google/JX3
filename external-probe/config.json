@@ -1,0 +1,21 @@
+{
+  "profile": "jx3gua-note-2026-10-22-unverified",
+  "process_name": "JX3ClientX64.exe",
+  "kworld_rva": "0xA755D8",
+  "manager_offset": "0x5673D8",
+  "map_head_primary": "0x38",
+  "map_head_fallback": "0x20",
+  "unit_name_offset": "0x88",
+  "loot_name_offset": "0x8C",
+  "buff_list_offset": "0xD60",
+  "scene_grid_offset": "0x60",
+  "grid_width_offset": "0x790",
+  "grid_height_offset": "0x794",
+  "grid_cells_offset": "0x7A8",
+  "grid_row_stride": "128",
+  "cell_loot_offset": "0x98",
+  "cell_npc_offset": "0x68",
+  "selection_ban_counter": "0xC0C",
+  "target_slot_1": "0xC2C",
+  "target_slot_2": "0xC40"
+}
