@@ -1,0 +1,1 @@
+"""JX3 External Probe - research prototype. No code injection or anti-cheat bypass."""
