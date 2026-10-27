@@ -1,0 +1,77 @@
+name: One-off JX3 sample static analysis
+on:
+  push:
+    paths:
+      - .github/workflows/jx3-sample-static-analysis.yml
+  workflow_dispatch:
+jobs:
+  investigate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Download sample in disposable browser and inspect without executing
+        shell: bash
+        run: |
+          set -e
+          python -m pip install --quiet playwright pefile
+          python -m playwright install --with-deps chromium >/dev/null 2>&1
+          python - <<'PY'
+          import asyncio,hashlib,os,re,struct,collections
+          import pefile
+          from playwright.async_api import async_playwright
+          url='https://www.hostize.com/zh/s/ZYn3f-M9bB'
+          async def run():
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch(headless=True)
+                  context=await browser.new_context(accept_downloads=True, locale='zh-CN')
+                  page=await context.new_page()
+                  page.on('response',lambda resp: print('NETWORK',resp.status,resp.url[:230]) if any(k in resp.url.lower() for k in ('download','api/file','/s/zyn3')) else None)
+                  print('NAV_START',url)
+                  resp=await page.goto(url,timeout=45000,wait_until='domcontentloaded')
+                  print('PAGE',resp.status if resp else '-',page.url)
+                  await page.wait_for_timeout(5000)
+                  print('TITLE',await page.title())
+                  print('BUTTONS',[(await b.inner_text())[:100] for b in (await page.get_by_role('button').all())][:25])
+                  try:
+                      async with page.expect_download(timeout=45000) as di:
+                          bt=page.get_by_role('button',name=re.compile('下载|Download|下載',re.I))
+                          if await bt.count(): await bt.first.click()
+                          else: await page.get_by_text('下载',exact=True).first.click()
+                      d=await di.value
+                      print('DOWNLOAD',d.suggested_filename,d.url[:300])
+                      await d.save_as('upd.exe')
+                  except Exception as e:
+                      print('DOWNLOAD_FAILED',type(e).__name__,str(e)[:600]);print('VISIBLE_TEXT',(await page.locator('body').inner_text())[:2000]);await browser.close();return
+                  await browser.close()
+          asyncio.run(run())
+          if not os.path.exists('upd.exe'):
+              print('RESULT:NO_SAMPLE_RETRIEVED');raise SystemExit(0)
+          data=open('upd.exe','rb').read()
+          print('SIZE',len(data),'SHA256',hashlib.sha256(data).hexdigest())
+          print('HEADER',data[:64].hex())
+          if data[:2]!=b'MZ': print('NOT_PE');raise SystemExit(0)
+          try:
+              pe=pefile.PE(data=data,fast_load=False)
+              print('PE_TIMESTAMP',pe.FILE_HEADER.TimeDateStamp,'MACHINE',hex(pe.FILE_HEADER.Machine),'SUBSYSTEM',pe.OPTIONAL_HEADER.Subsystem,'ENTRY_RVA',hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint))
+              print('SECTIONS',[(x.Name.decode(errors='replace').strip('\\x00'),hex(x.VirtualAddress),x.SizeOfRawData,round(x.get_entropy(),2)) for x in pe.sections])
+              if hasattr(pe,'DIRECTORY_ENTRY_IMPORT'):
+                  for im in pe.DIRECTORY_ENTRY_IMPORT:
+                      names=[x.name.decode(errors='replace') if x.name else '#'+str(x.ordinal) for x in im.imports]
+                      print('IMPORT',im.dll.decode(errors='replace'),','.join(names)[:2000])
+              if hasattr(pe,'DIRECTORY_ENTRY_EXPORT'):
+                  print('EXPORTS',[x.name.decode(errors='replace') if x.name else None for x in pe.DIRECTORY_ENTRY_EXPORT.symbols][:100])
+              if hasattr(pe,'DIRECTORY_ENTRY_TLS'):
+                  print('TLS_PRESENT')
+          except Exception as e: print('PE_PARSE_FAILED',type(e).__name__,str(e)[:1000])
+          ascii_strings=[x.decode('latin-1',errors='replace') for x in re.findall(rb'[\\x20-\\x7E]{6,}',data)]
+          wide_strings=[x.decode('utf-16le',errors='replace') for x in re.findall(rb'(?:[\\x20-\\x7E]\\x00){6,}',data)]
+          strings=ascii_strings+wide_strings
+          print('STRINGS_TOTAL',len(strings))
+          keywords=['jx3','jx3client','readprocessmemory','writeprocessmemory','openprocess','createprocess','remote','inject','driver','hook','debug','game','user32','ntdll','kernel32','license','serial','token','http','https','cmd.exe','powershell','友鹤','剑网','target','npc','loot','buff','skill','esp','keyboard','mouse','overlay','ImGui','autoit','pyinstaller','upx','lua','gdi32']
+          matches=[x[:320] for x in strings if any(k.lower() in x.lower() for k in keywords)]
+          print('SELECTED_STRINGS',len(matches))
+          for x in matches[:230]: print('STR',repr(x))
+          print('FINISHED_STATIC_ONLY')
+          PY
