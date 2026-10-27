@@ -15,37 +15,17 @@ jobs:
         shell: bash
         run: |
           set -e
-          python -m pip install --quiet playwright pefile
-          python -m playwright install --with-deps chromium >/dev/null 2>&1
+          python -m pip install --quiet pefile requests
           python - <<'PY'
-          import asyncio,hashlib,os,re,struct,collections
-          import pefile
-          from playwright.async_api import async_playwright
-          url='https://www.hostize.com/zh/s/ZYn3f-M9bB'
-          async def run():
-              async with async_playwright() as p:
-                  browser=await p.chromium.launch(headless=True)
-                  context=await browser.new_context(accept_downloads=True, locale='zh-CN')
-                  page=await context.new_page()
-                  page.on('response',lambda resp: print('NETWORK',resp.status,resp.url[:230]) if any(k in resp.url.lower() for k in ('download','api/file','/s/zyn3')) else None)
-                  print('NAV_START',url)
-                  resp=await page.goto(url,timeout=45000,wait_until='domcontentloaded')
-                  print('PAGE',resp.status if resp else '-',page.url)
-                  await page.wait_for_timeout(5000)
-                  print('TITLE',await page.title())
-                  print('BUTTONS',[(await b.inner_text())[:100] for b in (await page.get_by_role('button').all())][:25])
-                  try:
-                      async with page.expect_download(timeout=45000) as di:
-                          bt=page.get_by_role('button',name=re.compile('下载|Download|下載',re.I))
-                          if await bt.count(): await bt.first.click()
-                          else: await page.get_by_text('下载',exact=True).first.click()
-                      d=await di.value
-                      print('DOWNLOAD',d.suggested_filename,d.url[:300])
-                      await d.save_as('upd.exe')
-                  except Exception as e:
-                      print('DOWNLOAD_FAILED',type(e).__name__,str(e)[:600]);print('VISIBLE_TEXT',(await page.locator('body').inner_text())[:2000]);await browser.close();return
-                  await browser.close()
-          asyncio.run(run())
+          import hashlib,os,re,requests
+          u='https://www.hostize.com/api/shares/ZYn3f-M9bB/materials/89RyISgyl9/download'
+          try:
+              resp=requests.get(u,timeout=50,headers={'Referer':'https://www.hostize.com/zh/s/ZYn3f-M9bB','User-Agent':'Mozilla/5.0'})
+              print('DOWNLOAD_STATUS',resp.status_code,'URL',resp.url[:180],'LEN',len(resp.content))
+              if resp.status_code==200 and resp.content[:2]==b'MZ':
+                  open('upd.exe','wb').write(resp.content)
+              else: print('UNEXPECTED_RESPONSE',repr(resp.content[:500]))
+          except Exception as exc: print('DOWNLOAD_ERROR',type(exc).__name__,str(exc)[:700])
           if not os.path.exists('upd.exe'):
               print('RESULT:NO_SAMPLE_RETRIEVED');raise SystemExit(0)
           data=open('upd.exe','rb').read()
