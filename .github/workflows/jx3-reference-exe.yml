@@ -1,0 +1,115 @@
+name: Import and inspect JX3 reference binary (one-off)
+on:
+  push:
+    paths: ['.github/workflows/jx3-reference-exe.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch, verify, store, and statically inspect binary (never execute)
+        shell: bash
+        run: |
+          python -m pip install --quiet requests pefile capstone
+          mkdir -p external-probe
+          python - <<'PY'
+          import requests,hashlib,os,sys,re,struct,json
+          from collections import Counter
+          import pefile
+          from capstone import Cs, CS_ARCH_X86,CS_MODE_64
+          url="https://www.hostize.com/api/shares/ZYn3f-M9bB/materials/89RyISgyl9/download"
+          ref="e9eeef05a8d917c237b573a00c8404a2bf11468574aba342aca2837516aae8db"
+          r=requests.get(url,timeout=60,headers={"Referer":"https://www.hostize.com/zh/s/ZYn3f-M9bB","User-Agent":"Mozilla/5.0"})
+          r.raise_for_status()
+          data=r.content
+          actual=hashlib.sha256(data).hexdigest()
+          print("FILE_BYTES",len(data),"SHA256",actual)
+          assert actual==ref, "Unexpected sample hash, refusing to store"
+          open("external-probe/upd.exe","wb").write(data)
+          pe=pefile.PE(data=data)
+          base=pe.OPTIONAL_HEADER.ImageBase
+          print("MACHINE",hex(pe.FILE_HEADER.Machine),"IMAGE_BASE",hex(base),"ENTRY_RVA",hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint))
+          print("LINKER_TIMESTAMP",pe.FILE_HEADER.TimeDateStamp)
+          for s in pe.sections:
+              print("SECTION",repr(s.Name.decode(errors="replace")),hex(s.VirtualAddress),s.SizeOfRawData,round(s.get_entropy(),3))
+          print("IMPORTED APIS")
+          for e in getattr(pe,"DIRECTORY_ENTRY_IMPORT",[]):
+              print(e.dll.decode(errors="replace")," ".join(x.name.decode(errors="replace") if x.name else str(x.ordinal) for x in e.imports))
+          # String inventory that retains offsets and adjoining strings rather than assuming NUL separators.
+          ranges=[]
+          for m in re.finditer(rb"[\x20-\x7e]{4,}",data):
+              s=m.group().decode("latin-1"); ranges.append((m.start(),s,"ascii"))
+          for m in re.finditer(rb"(?:[\x20-\x7e]\x00){4,}",data):
+              ranges.append((m.start(),m.group().decode("utf-16le"),"wide"))
+          for m in re.finditer(rb"[\x80-\xff][\x80-\xff\x20-\x7e]{6,}",data):
+              try:
+                  s=m.group().decode("utf8")
+                  if len(s)>=3: ranges.append((m.start(),s,"utf8"))
+              except UnicodeDecodeError: pass
+          for off,s,typ in ranges:
+              if (off>200_000 and len(s)>3) or any(k in s.lower() for k in ("patch","target","plugin","scan","orig","readback","apply","mode","restore","not found","check only","write handle","pid=","exe","dll","up.rs")):
+                  if len(s)>420:s=s[:420]+"..."
+                  if re.search(r"[a-zA-Z]{3}",s):
+                      print("STRING",hex(off),typ,repr(s))
+          # Dump .rdata hexadecimal+string around app messages; useful to reconstruct embedded lengths.
+          for s in pe.sections:
+              if s.Name.rstrip(b"\x00")==b".rdata":
+                  chunk=data[s.PointerToRawData:s.PointerToRawData+s.SizeOfRawData]
+                  sig=b"target not running"
+                  ind=chunk.find(sig)
+                  if ind>=0:
+                      a=max(0,ind-512); b=min(len(chunk),ind+1800)
+                      print("RDATA_MESSAGE_NEIGHBORHOOD",hex(s.PointerToRawData+a),chunk[a:b].hex())
+          # Disassemble selected entry and all near-string RIP-relative references in code.
+          md=Cs(CS_ARCH_X86,CS_MODE_64)
+          md.detail=True
+          txt=next(s for s in pe.sections if s.Name.rstrip(b"\x00")==b".text")
+          raw=txt.get_data()
+          codeva=base+txt.VirtualAddress
+          entry=base+pe.OPTIONAL_HEADER.AddressOfEntryPoint
+          eo=entry-codeva
+          print("ENTRY_DISASSEMBLY")
+          for ins in list(md.disasm(raw[eo:eo+550],entry))[:100]:
+              print(hex(ins.address),ins.mnemonic,ins.op_str)
+          # Identify RIP memory operands that point into .rdata, then rank by area near strings.
+          mstart=base+next(s.VirtualAddress for s in pe.sections if s.Name.rstrip(b"\x00")==b".rdata")
+          mend=mstart+next(s.Misc_VirtualSize for s in pe.sections if s.Name.rstrip(b"\x00")==b".rdata")
+          refs=[]
+          for ins in md.disasm(raw,codeva):
+              try:
+                  if "rip" not in ins.op_str: continue
+                  from capstone.x86_const import X86_OP_MEM,X86_REG_RIP
+                  for op in ins.operands:
+                      if op.type==X86_OP_MEM and op.mem.base==X86_REG_RIP:
+                          target=ins.address+ins.size+op.mem.disp
+                          if mstart<=target<mend:
+                              refs.append((target,ins.address,ins.mnemonic+" "+ins.op_str))
+              except Exception: pass
+          for off,s,typ in ranges:
+              if typ!="ascii" or not any(k in s.lower() for k in ("target not running","plugin unloaded","write handle failed","restore","check only","pid= mode=","origpatched","apply","src\\up.rs")): continue
+              rva=pe.get_rva_from_offset(off)
+              target=base+rva
+              close=[x for x in refs if abs(x[0]-target)<32]
+              print("STRING_REFS",repr(s[:90]),hex(target),close[:40])
+              for _,instr,_ in close[:5]:
+                  start=max(0,instr-codeva-70)
+                  print("XREF_DISASM_AT",hex(instr))
+                  for ins in list(md.disasm(raw[start:start+230],codeva+start))[:40]:
+                      print(hex(ins.address),ins.mnemonic,ins.op_str)
+          print("FINISHED_STATIC_ONLY")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add external-probe/upd.exe
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(jx3): preserve verified upd.exe sample as reference"
+            git push origin HEAD:master
+          else
+            echo "UNCHANGED_ALREADY_PRESENT"
+          fi
