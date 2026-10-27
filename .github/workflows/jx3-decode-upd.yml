@@ -1,0 +1,68 @@
+name: Decode JX3 reference EXE without execution
+on:
+  push:
+    paths: ['.github/workflows/jx3-decode-upd.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Offline disassembly and static cross-references only
+        shell: bash
+        run: |
+          pip -q install pefile capstone
+          python - <<'PY'
+          import pefile,hashlib
+          from capstone import Cs,CS_ARCH_X86,CS_MODE_64
+          from capstone.x86_const import X86_OP_MEM,X86_REG_RIP
+          data=open('external-probe/upd.exe','rb').read()
+          print('SHA256',hashlib.sha256(data).hexdigest())
+          pe=pefile.PE(data=data)
+          image=pe.OPTIONAL_HEADER.ImageBase
+          iat={}
+          for lib in pe.DIRECTORY_ENTRY_IMPORT:
+            for a in lib.imports:
+              iat[a.address]=lib.dll.decode()+'!'+(a.name.decode() if a.name else str(a.ordinal))
+          sections={s.Name.rstrip(b'\0').decode(errors='replace'):s for s in pe.sections}
+          text=sections['.text']; textdat=text.get_data()
+          md=Cs(CS_ARCH_X86,CS_MODE_64);md.detail=True
+          print('### CODE SEGMENT with resolved imports, RVA 0x1000 - 0x3000')
+          for ins in md.disasm(textdat[:0x2100],image+text.VirtualAddress):
+            extra=''
+            for op in ins.operands:
+              if op.type==X86_OP_MEM and op.mem.base==X86_REG_RIP:
+                ptr=ins.address+ins.size+op.mem.disp
+                if ptr in iat: extra+=' ('+iat[ptr]+')'
+                elif image+0x30000<=ptr<image+0x50000:extra+=' (DATA_RVA='+hex(ptr-image)+')'
+            print(hex(ins.address-image),ins.mnemonic,ins.op_str,extra)
+          print('### RDATA FIRST 0xD00 hex ascii')
+          rd=sections['.rdata']
+          chunk=rd.get_data()[:0xe00]
+          for p in range(0,len(chunk),32):
+            row=chunk[p:p+32]
+            print(hex(rd.VirtualAddress+p),row.hex(' '),''.join(chr(x) if 32<=x<127 else '.' for x in row))
+          print('### DATA entire nonzero chunks')
+          dd=sections['.data']
+          chunk=dd.get_data()
+          for p in range(0,len(chunk),32):
+            row=chunk[p:p+32]
+            if any(row):print(hex(dd.VirtualAddress+p),row.hex(' '),''.join(chr(x) if 32<=x<127 else '.' for x in row))
+          print('### PRELIMINARY PATCH CALL SITES')
+          instructions=list(md.disasm(textdat,image+text.VirtualAddress))
+          hits=[]
+          for idx,ins in enumerate(instructions):
+            for op in ins.operands:
+              if op.type==X86_OP_MEM and op.mem.base==X86_REG_RIP:
+                target=ins.address+ins.size+op.mem.disp
+                if target in iat and any(k in iat[target] for k in ('OpenProcess','WriteProcessMemory','ReadProcessMemory','VirtualProtectEx','VirtualQueryEx','EnumProcesses','QueryFullProcessImageName')):
+                  hits.append(idx)
+          for idx in hits:
+            ins=instructions[idx]
+            print('CALLEE',hex(ins.address-image),ins.mnemonic,ins.op_str,'::',iat.get(ins.address+ins.size+next(o.mem.disp for o in ins.operands if o.type==X86_OP_MEM and o.mem.base==X86_REG_RIP)))
+            for x in instructions[max(0,idx-12):idx+9]:
+              print(hex(x.address-image),x.mnemonic,x.op_str)
+          PY
