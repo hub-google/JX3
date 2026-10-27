@@ -17,7 +17,7 @@ jobs:
           set -e
           python -m pip install --quiet pefile requests
           python - <<'PY'
-          import hashlib,os,re,requests
+          import hashlib,os,re,requests,pefile
           u='https://www.hostize.com/api/shares/ZYn3f-M9bB/materials/89RyISgyl9/download'
           try:
               resp=requests.get(u,timeout=50,headers={'Referer':'https://www.hostize.com/zh/s/ZYn3f-M9bB','User-Agent':'Mozilla/5.0'})
@@ -53,5 +53,8 @@ jobs:
           matches=[x[:320] for x in strings if any(k.lower() in x.lower() for k in keywords)]
           print('SELECTED_STRINGS',len(matches))
           for x in matches[:230]: print('STR',repr(x))
+          print('OTHER_STRINGS_BEGIN')
+          for x in strings[:900]: print('OTHER',repr(x[:180]))
+          print('OTHER_STRINGS_END')
           print('FINISHED_STATIC_ONLY')
           PY
